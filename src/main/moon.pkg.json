@@ -1,0 +1,6 @@
+{
+  "is-main": true,
+  "import": [
+    "antisatori/moon-examples/lib"
+  ]
+}
