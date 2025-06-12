@@ -315,7 +315,7 @@ fn regex_match(
   anchoredEnd~ : Bool = false
 ) -> Bool {
   // Handle start (^) and end ($) anchors
-  if pattern.length() > 0 && pattern.has_prefix("^") {
+  if pattern.has_prefix("^") {
     regex_match(
       // Skip the caret character (^) at the beginning
       pattern.substring(start=1),
