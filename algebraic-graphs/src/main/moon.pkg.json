@@ -1,0 +1,6 @@
+{
+  "is-main": true,
+  "import": [
+    "antisatori/graph/lib"
+  ]
+}
