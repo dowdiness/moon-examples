@@ -23,99 +23,125 @@
 // compass_pt : n | ne | e | se | s | sw | w | nw | c | _
 
 // Token types for the DOT language
+///|
 pub(all) enum Token {
   // Keywords
-  Strict;
-  Graph;
-  Digraph;
-  Node;
-  Edge;
-  Subgraph;
+  Strict
+  Graph
+  Digraph
+  Node
+  Edge
+  Subgraph
 
   // Identifiers and literals
-  ID(String);
+  ID(String)
+  LeftBrace
 
   // Operators and punctuation
-  LeftBrace;     // {
-  RightBrace;    // }
-  LeftBracket;   // [
-  RightBracket;  // ]
-  Colon;         // :
-  Semicolon;     // ;
-  Comma;         // ,
-  Equals;        // =
-  Arrow;         // ->
-  Line;          // --
+  RightBrace // {
+  LeftBracket // }
+  RightBracket // [
+  Colon // ]
+  Semicolon // :
+  Comma // ;
+  Equals // ,
+  Arrow // =
+  Line // ->
+  // --
 
   // Compass points
-  CompassPt(String); // n, ne, e, se, s, sw, w, nw, c, _
+  CompassPt(String)
+  EOF // n, ne, e, se, s, sw, w, nw, c, _
 
   // End of file
-  EOF;
-} derive (Eq, Show)
+} derive(Eq, Show)
 
 // AST node types
+///|
 pub(all) enum CompassPoint {
-  N; NE; E; SE; S; SW; W; NW; C; Underscore;
-} derive (Eq, Show)
+  N
+  NE
+  E
+  SE
+  S
+  SW
+  W
+  NW
+  C
+  Underscore
+} derive(Eq, Show)
 
+///|
 pub(all) struct Port {
   mut id : String?
   mut compass : CompassPoint?
-} derive (Eq, Show)
+} derive(Eq, Show)
 
+///|
 pub(all) struct NodeId {
   id : String
   port : Port?
-} derive (Eq, Show)
+} derive(Eq, Show)
 
+///|
 pub(all) enum EdgeOp {
-  Directed;   // ->
-  Undirected; // --
-} derive (Eq, Show)
+  Directed
+  Undirected // ->
+} derive ( // --
+  Eq,
+  Show,
+)
 
+///|
 pub(all) struct Attribute {
   key : String
   value : String
-} derive (Eq, Show)
+} derive(Eq, Show)
 
+///|
 pub(all) struct AttributeList {
   attributes : Array[Attribute]
-} derive (Eq, Show)
+} derive(Eq, Show)
 
+///|
 pub(all) enum Statement {
-  NodeStmt(NodeId, AttributeList?);
-  EdgeStmt(NodeId, Array[(EdgeOp, NodeId)], AttributeList?);
-  AttrStmt(String, AttributeList); // "graph", "node", or "edge"
-  Assignment(String, String);
-  Subgraph(Subgraph);
-} derive (Eq, Show)
+  NodeStmt(NodeId, AttributeList?)
+  EdgeStmt(NodeId, Array[(EdgeOp, NodeId)], AttributeList?)
+  AttrStmt(String, AttributeList) // "graph", "node", or "edge"
+  Assignment(String, String)
+  Subgraph(Subgraph)
+} derive(Eq, Show)
 
+///|
 struct Subgraph {
   id : String?
   statements : Array[Statement]
-} derive (Eq, Show)
+} derive(Eq, Show)
 
+///|
 struct Graph {
   strict : Bool
   directed : Bool
   id : String?
   statements : Array[Statement]
-} derive (Eq, Show)
+} derive(Eq, Show)
 
 // Lexer implementation
+///|
 struct Lexer {
   input : String
   mut position : Int
   mut current_char : Char?
 }
 
+///|
 fn Lexer::new(input : String) -> Lexer {
   let lexer = { input, position: 0, current_char: None }
   lexer.advance()
   lexer
 }
 
+///|
 fn advance(self : Lexer) -> Unit {
   if self.position >= self.input.length() {
     self.current_char = None
@@ -125,6 +151,7 @@ fn advance(self : Lexer) -> Unit {
   }
 }
 
+///|
 fn skip_whitespace(self : Lexer) -> Unit {
   match self.current_char {
     Some(' ') | Some('\t') | Some('\n') | Some('\r') => {
@@ -135,12 +162,13 @@ fn skip_whitespace(self : Lexer) -> Unit {
   }
 }
 
+///|
 fn skip_comment(self : Lexer) -> Unit {
   match self.current_char {
     Some('/') => {
       self.advance()
       match self.current_char {
-        Some('/') => {
+        Some('/') =>
           // Single line comment
           loop self.current_char {
             Some('\n') | None => break
@@ -149,7 +177,6 @@ fn skip_comment(self : Lexer) -> Unit {
               continue self.current_char
             }
           }
-        }
         Some('*') => {
           // Multi-line comment
           self.advance()
@@ -178,7 +205,7 @@ fn skip_comment(self : Lexer) -> Unit {
         }
       }
     }
-    Some('#') => {
+    Some('#') =>
       // Hash comment
       loop self.current_char {
         Some('\n') | None => break
@@ -187,11 +214,11 @@ fn skip_comment(self : Lexer) -> Unit {
           continue self.current_char
         }
       }
-    }
     _ => ()
   }
 }
 
+///|
 fn read_identifier(self : Lexer) -> String {
   loop self.current_char, "" {
     Some(c), acc if c.is_numeric() || c.is_ascii_alphabetic() || c == '_' => {
@@ -201,10 +228,11 @@ fn read_identifier(self : Lexer) -> String {
     _, acc => break acc
   }
 }
+
+///|
 fn read_quoted_string(self : Lexer) -> String {
   let quote_char = self.current_char.unwrap()
   self.advance() // Skip opening quote
-
   let result = loop self.current_char, "" {
     Some(c), acc if c == quote_char => break acc // End of string
     Some('\\'), acc => {
@@ -229,27 +257,28 @@ fn read_quoted_string(self : Lexer) -> String {
     Some(c) if c == quote_char => self.advance()
     _ => ()
   }
-
   result
 }
 
+///|
 fn keyword_or_id(word : String) -> Token {
   match word {
-    "strict" => Strict;
-    "graph" => Graph;
-    "digraph" => Digraph;
-    "node" => Node;
-    "edge" => Edge;
-    "subgraph" => Subgraph;
-    "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw" | "c" | "_" => CompassPt(word);
-    _ => ID(word);
+    "strict" => Strict
+    "graph" => Graph
+    "digraph" => Digraph
+    "node" => Node
+    "edge" => Edge
+    "subgraph" => Subgraph
+    "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw" | "c" | "_" =>
+      CompassPt(word)
+    _ => ID(word)
   }
 }
 
+///|
 fn next_token(self : Lexer) -> Token {
   while true {
     self.skip_whitespace()
-
     match self.current_char {
       None => return EOF
       Some('/') | Some('#') => {
@@ -257,84 +286,87 @@ fn next_token(self : Lexer) -> Token {
         continue
       }
       Some('{') => {
-        self.advance();
-        return LeftBrace;
+        self.advance()
+        return LeftBrace
       }
       Some('}') => {
-        self.advance();
-        return RightBrace;
+        self.advance()
+        return RightBrace
       }
       Some('[') => {
-        self.advance();
-        return LeftBracket;
+        self.advance()
+        return LeftBracket
       }
       Some(']') => {
-        self.advance();
-        return RightBracket;
+        self.advance()
+        return RightBracket
       }
       Some(':') => {
-        self.advance();
-        return Colon;
+        self.advance()
+        return Colon
       }
       Some(';') => {
-        self.advance();
-        return Semicolon;
+        self.advance()
+        return Semicolon
       }
       Some(',') => {
-        self.advance();
-        return Comma;
+        self.advance()
+        return Comma
       }
       Some('=') => {
-        self.advance();
-        return Equals;
+        self.advance()
+        return Equals
       }
       Some('-') => {
-        self.advance();
+        self.advance()
         match self.current_char {
           Some('-') => {
-            self.advance();
-            return Line;
+            self.advance()
+            return Line
           }
           Some('>') => {
-            self.advance();
-            return Arrow;
+            self.advance()
+            return Arrow
           }
-          _ => return ID("-");
+          _ => return ID("-")
         }
       }
       Some('"') | Some('\'') => {
-        let str = self.read_quoted_string();
-        return ID(str);
+        let str = self.read_quoted_string()
+        return ID(str)
       }
       Some(c) if c.is_numeric() || c.is_ascii_alphabetic() || c == '_' => {
-        let word = self.read_identifier();
-        return keyword_or_id(word);
+        let word = self.read_identifier()
+        return keyword_or_id(word)
       }
       Some(c) if c.is_numeric() => {
-        let word = self.read_identifier();
-        return ID(word);
+        let word = self.read_identifier()
+        return ID(word)
       }
       Some(c) => {
-        self.advance();
-        return ID(c.to_string());
+        self.advance()
+        return ID(c.to_string())
       }
     }
   }
-  EOF;
+  EOF
 }
 
 // Parser implementation
+///|
 pub(all) struct Parser {
   lexer : Lexer
   mut current_token : Token
 }
 
+///|
 fn Parser::new(input : String) -> Parser {
   let lexer = Lexer::new(input)
   let current_token = lexer.next_token()
   { lexer, current_token }
 }
 
+///|
 fn eat(self : Parser, expected : Token) -> Bool {
   match (self.current_token, expected) {
     (ID(_), ID(_)) | (CompassPt(_), CompassPt(_)) => {
@@ -349,235 +381,243 @@ fn eat(self : Parser, expected : Token) -> Bool {
   }
 }
 
+///|
 fn parse_compass_point(compass_str : String) -> CompassPoint {
   match compass_str {
-    "n" => N;
-    "ne" => NE;
-    "e" => E;
-    "se" => SE;
-    "s" => S;
-    "sw" => SW;
-    "w" => W;
-    "nw" => NW;
-    "c" => C;
-    "_" => Underscore;
-    _ => C; // Default fallback
-  }
+    "n" => N
+    "ne" => NE
+    "e" => E
+    "se" => SE
+    "s" => S
+    "sw" => SW
+    "w" => W
+    "nw" => NW
+    "c" => C
+    "_" => Underscore
+    _ => C
+  } // Default fallback
 }
 
+///|
 fn parse_port(self : Parser) -> Port? {
   if not(self.eat(Colon)) {
     return None
   }
-
   let port = { id: None, compass: None }
-
   match self.current_token {
     ID(id) => {
-      port.id = Some(id);
-      ignore(self.eat(ID("")));
-
+      port.id = Some(id)
+      ignore(self.eat(ID("")))
       if self.eat(Colon) {
         match self.current_token {
           CompassPt(compass_str) => {
-            port.compass = Some(parse_compass_point(compass_str));
-            ignore(self.eat(CompassPt("")));
+            port.compass = Some(parse_compass_point(compass_str))
+            ignore(self.eat(CompassPt("")))
           }
-          _ => ();
+          _ => ()
         }
       }
     }
     CompassPt(compass_str) => {
-      port.compass = Some(parse_compass_point(compass_str));
-      ignore(self.eat(CompassPt("")));
+      port.compass = Some(parse_compass_point(compass_str))
+      ignore(self.eat(CompassPt("")))
     }
-    _ => ();
+    _ => ()
   }
-
   Some(port)
 }
 
+///|
 fn parse_node_id(self : Parser) -> NodeId? {
   match self.current_token {
     ID(id) => {
-      ignore(self.eat(ID("")));
-      let port = self.parse_port();
-      Some({ id, port });
+      ignore(self.eat(ID("")))
+      let port = self.parse_port()
+      Some({ id, port })
     }
-    _ => None;
+    _ => None
   }
 }
 
+///|
 fn parse_attribute(self : Parser) -> Attribute? {
   match self.current_token {
     ID(key) => {
-      ignore(self.eat(ID("")));
+      ignore(self.eat(ID("")))
       if self.eat(Equals) {
         match self.current_token {
           ID(value) => {
-            ignore(self.eat(ID("")));
-            Some({ key, value });
+            ignore(self.eat(ID("")))
+            Some({ key, value })
           }
-          _ => None;
+          _ => None
         }
       } else {
-        None;
+        None
       }
     }
-    _ => None;
+    _ => None
   }
 }
 
+///|
 fn parse_a_list(self : Parser) -> Array[Attribute] {
-  let attributes = [];
-
+  let attributes = []
   while true {
     match self.parse_attribute() {
       Some(attr) => {
-        attributes.push(attr);
+        attributes.push(attr)
         match self.current_token {
-          Semicolon | Comma => {
-            ignore(self.eat(self.current_token));
-          }
-          _ => ();
+          Semicolon | Comma => ignore(self.eat(self.current_token))
+          _ => ()
         }
       }
-      None => break;
+      None => break
     }
   }
-
-  attributes;
+  attributes
 }
 
+///|
 fn parse_attr_list(self : Parser) -> AttributeList? {
   if not(self.eat(LeftBracket)) {
-    return None;
+    return None
   }
-
-  let attributes = self.parse_a_list();
-
+  let attributes = self.parse_a_list()
   if not(self.eat(RightBracket)) {
-    return None;
+    return None
   }
-
-  let attr_list = { attributes };
+  let attr_list = { attributes, }
 
   // Handle multiple attribute lists
   match self.parse_attr_list() {
-    Some(next_attr_list) => {
-      attr_list.attributes.append(next_attr_list.attributes);
-    }
-    None => ();
+    Some(next_attr_list) =>
+      attr_list.attributes.append(next_attr_list.attributes)
+    None => ()
   }
-
-  Some(attr_list);
+  Some(attr_list)
 }
 
+///|
 fn parse_edge_rhs(self : Parser) -> Array[(EdgeOp, NodeId)]? {
-  let edges = [];
-
+  let edges = []
   while true {
     let edge_op = match self.current_token {
-      Arrow => { ignore(self.eat(Arrow)); Directed; }
-      Line => { ignore(self.eat(Line)); Undirected; }
-      _ => break;
-    };
-
-    match self.parse_node_id() {
-      Some(node_id) => {
-        edges.push((edge_op, node_id));
+      Arrow => {
+        ignore(self.eat(Arrow))
+        Directed
       }
-      None => break;
+      Line => {
+        ignore(self.eat(Line))
+        Undirected
+      }
+      _ => break
+    }
+    match self.parse_node_id() {
+      Some(node_id) => edges.push((edge_op, node_id))
+      None => break
     }
   }
-
   if edges.is_empty() {
-    None;
+    None
   } else {
-    Some(edges);
+    Some(edges)
   }
 }
 
+///|
 fn parse_statement(self : Parser) -> Statement? {
   match self.current_token {
     // Attribute statement
     Graph | Node | Edge => {
       let attr_type = match self.current_token {
-        Graph => { ignore(self.eat(Graph)); "graph"; }
-        Node => { ignore(self.eat(Node)); "node"; }
-        Edge => { ignore(self.eat(Edge)); "edge"; }
-        _ => "";
-      };
-
+        Graph => {
+          ignore(self.eat(Graph))
+          "graph"
+        }
+        Node => {
+          ignore(self.eat(Node))
+          "node"
+        }
+        Edge => {
+          ignore(self.eat(Edge))
+          "edge"
+        }
+        _ => ""
+      }
       match self.parse_attr_list() {
-        Some(attr_list) => Some(AttrStmt(attr_type, attr_list));
-        None => None;
+        Some(attr_list) => Some(AttrStmt(attr_type, attr_list))
+        None => None
       }
     }
 
     // Subgraph
-    Subgraph => {
+    Subgraph =>
       match self.parse_subgraph() {
-        Some(subgraph) => Some(Subgraph(subgraph));
-        None => None;
+        Some(subgraph) => Some(Subgraph(subgraph))
+        None => None
       }
-    }
 
     // Unhandled tokens
-    Digraph | Strict | LeftBrace | RightBrace |
-    LeftBracket | RightBracket | Semicolon |
-    Comma | Equals | CompassPt(_) |
-    Arrow | Colon | Line | EOF => None;
-
-    ID(_) => {
+    Digraph
+    | Strict
+    | LeftBrace
+    | RightBrace
+    | LeftBracket
+    | RightBracket
+    | Semicolon
+    | Comma
+    | Equals
+    | CompassPt(_)
+    | Arrow
+    | Colon
+    | Line
+    | EOF => None
+    ID(_) =>
       match self.parse_node_id() {
-        Some(node_id) => {
+        Some(node_id) =>
           // Check if this is an edge or node statement
           match self.parse_edge_rhs() {
             Some(edges) => {
-              let attr_list = self.parse_attr_list();
-              Some(EdgeStmt(node_id, edges, attr_list));
+              let attr_list = self.parse_attr_list()
+              Some(EdgeStmt(node_id, edges, attr_list))
             }
-            None => {
+            None =>
               // Check for assignment
               match node_id.port {
                 Some(_) => {
                   // Node statement with port
-                  let attr_list = self.parse_attr_list();
-                  Some(NodeStmt(node_id, attr_list));
+                  let attr_list = self.parse_attr_list()
+                  Some(NodeStmt(node_id, attr_list))
                 }
-                None => {
+                None =>
                   match self.current_token {
                     Equals => {
-                      self.eat(Equals) |> ignore;
+                      self.eat(Equals) |> ignore
                       match self.current_token {
                         ID(value) => {
-                          self.eat(ID("")) |> ignore;
-                          Some(Assignment(node_id.id, value));
+                          self.eat(ID("")) |> ignore
+                          Some(Assignment(node_id.id, value))
                         }
-                        _ => None;
+                        _ => None
                       }
                     }
                     _ => {
                       // Node statement
-                      let attr_list = self.parse_attr_list();
-                      Some(NodeStmt(node_id, attr_list));
+                      let attr_list = self.parse_attr_list()
+                      Some(NodeStmt(node_id, attr_list))
                     }
                   }
-                }
               }
-              }
-            }
           }
-        None => None;
-        }
+        None => None
       }
   }
 }
 
+///|
 fn parse_stmt_list(self : Parser) -> Array[Statement] {
   let statements = []
-
   while true {
     match self.parse_statement() {
       Some(stmt) => {
@@ -585,8 +625,8 @@ fn parse_stmt_list(self : Parser) -> Array[Statement] {
         // Optional semicolon
         loop self.current_token {
           Semicolon => {
-            self.eat(Semicolon) |> ignore;
-            continue self.current_token;
+            self.eat(Semicolon) |> ignore
+            continue self.current_token
           }
           _ => break
         }
@@ -594,41 +634,38 @@ fn parse_stmt_list(self : Parser) -> Array[Statement] {
       None => break
     }
   }
-
   statements
 }
 
+///|
 fn parse_subgraph(self : Parser) -> Subgraph? {
   // Optional "subgraph" keyword
   let id = loop self.current_token, None {
     Subgraph, id => {
-      self.eat(Subgraph) |> ignore;
+      self.eat(Subgraph) |> ignore
       // Optional ID after subgraph
       match self.current_token {
         ID(sub_id) => {
           self.eat(ID("")) |> ignore
-          continue self.current_token, Some(sub_id);
+          continue self.current_token, Some(sub_id)
         }
-        _ => continue self.current_token, id;
+        _ => continue self.current_token, id
       }
     }
     _, id => break id
   }
-
   if (self.eat(LeftBrace) |> not) {
     return None
   }
-
   let statements = self.parse_stmt_list()
-
   if (self.eat(RightBrace) |> not) {
     return None
   }
-
   Some({ id, statements })
 }
 
 // graph : [ strict ] (graph | digraph) [ ID ] '{' stmt_list '}'
+///|
 fn parse_graph(self : Parser) -> Graph? {
   // Optional "strict" [ strict ]
   let strict = match self.current_token {
@@ -673,45 +710,41 @@ fn parse_graph(self : Parser) -> Graph? {
   if not(self.eat(RightBrace)) {
     return None
   }
-
   Some({ strict, directed, id, statements })
 }
 
 // Public API
+///|
 pub fn parse_dot(input : String) -> Graph? {
   let parser = Parser::new(input)
   parser.parse_graph()
 }
 
 // Helper function to format the AST for debugging
+///|
 pub fn format_graph(graph : Graph) -> String {
   let mut result = ""
-
   if graph.strict {
     result = result + "strict "
   }
-
   if graph.directed {
     result = result + "digraph"
   } else {
-    result = result +"graph"
+    result = result + "graph"
   }
-
   match graph.id {
     Some(id) => result = result + " " + id
     None => ()
   }
-
   result = result + " {\n"
-
   for stmt in graph.statements {
     result = result + "  " + format_statement(stmt) + "\n"
   }
-
   result = result + "}"
   result
 }
 
+///|
 fn format_statement(stmt : Statement) -> String {
   match stmt {
     NodeStmt(node_id, attr_list) => {
@@ -739,7 +772,7 @@ fn format_statement(stmt : Statement) -> String {
     EdgeStmt(start_node, edges, attr_list) => {
       let mut result = loop edges[:], start_node.id {
         [], acc => break acc
-        [(edge_op, node_id), ..rest], acc => {
+        [(edge_op, node_id), .. rest], acc => {
           let op_str = match edge_op {
             Directed => " -> "
             Undirected => " -- "
@@ -753,12 +786,9 @@ fn format_statement(stmt : Statement) -> String {
       }
       result
     }
-    AttrStmt(attr_type, attr_list) => {
+    AttrStmt(attr_type, attr_list) =>
       attr_type + " " + format_attr_list(attr_list)
-    }
-    Assignment(key, value) => {
-      key + " = " + value
-    }
+    Assignment(key, value) => key + " = " + value
     Subgraph(subgraph) => {
       let mut result = "subgraph"
       match subgraph.id {
@@ -771,6 +801,7 @@ fn format_statement(stmt : Statement) -> String {
   }
 }
 
+///|
 fn format_compass(compass : CompassPoint) -> String {
   match compass {
     N => "n"
@@ -786,6 +817,7 @@ fn format_compass(compass : CompassPoint) -> String {
   }
 }
 
+///|
 fn format_attr_list(attr_list : AttributeList) -> String {
   let mut result = "["
   let mut first = true
@@ -798,26 +830,4 @@ fn format_attr_list(attr_list : AttributeList) -> String {
   }
   result = result + "]"
   result
-}
-
-test "dot_parse" {
-    let dot_source =
-      #|  strict graph id_for_test_100 {
-      #|    a -- b
-      #|    a -- b
-      #|    b -- a [color=blue]
-      #|  }
-
-  match parse_dot(dot_source) {
-    Some(graph) => {
-      println("Parsed successfully:")
-      println("graph structure:")
-      println(graph)
-      println("format graph:")
-      println(format_graph(graph))
-    }
-    None => {
-      println("Parse error")
-    }
-  }
 }
