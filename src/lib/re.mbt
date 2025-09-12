@@ -1,5 +1,13 @@
 // Build a Regex Engine in Less than 40 Lines of Code
+
+// Warning: This implementation can lead to catastrophic backtracking
+// https://v8.dev/blog/non-backtracking-regexp
+
+// Backtracking Regex Engine based on the blog post:
 // https://nickdrane.com/build-your-own-regex/
+
+// JS Implementation example:
+// https://github.com/richardartoul/regex-engine/blob/master/regexEngine.js
 
 // This is a simple regex engine that supports the following features:
 // - Literal characters
@@ -9,6 +17,17 @@
 // - Kleene star (*) matches zero or more of the preceding character
 // - Concatenation
 // - Alternation (|)
+// - Grouping (()) is not supported in this implementation
+// - Character classes ([]) are not supported in this implementation
+// - Backreferences (\1, \2, etc.) are not supported in this implementation
+// - Lookahead and lookbehind assertions are not supported in this implementation
+// - Unicode support is not implemented
+// - Case-insensitive matching is not implemented
+// - Multiline matching is not implemented
+// - Dotall matching (.) is not implemented
+// - Non-capturing groups (?:...) are not supported in this implementation
+// - Named groups (?P<name>...) are not supported in this implementation
+// - Possessive quantifiers (*+, ?+, ++, etc.) are not supported in this implementation
 
 fn safe_char_at(s: String, i: Int) -> Option[Char] {
   if i < s.length() {
@@ -68,30 +87,29 @@ fn matchStar(pattern: String, text: String) -> Bool {
 }
 
 fn search(pattern: String, text: String) -> Bool {
-  // Check if the pattern contains choice (|)
-  if pattern.contains("|") {
-    pattern.split("|")
+  match pattern {
+    // Empty string matches any string
+    "" => true
+    // Boolean "or": Check if the pattern contains choice (|)
+    p if p.contains("|") => p.split("|")
       .to_array()
       .map(fn (p) -> Bool {
         search(p.to_string(), text)
       })
       .contains(true)
-  } else {
-    match pattern {
-      "" => true
-      _ => match safe_char_at(pattern, 0) {
-        Some('^') => matchRegex(safe_substring(pattern, 1), text)
-        _ if text.is_empty() => matchRegex(pattern, text)
-        _ => {
-          let mut r = false
-          fn judge (i: Int, _: Char) -> Unit {
-            if matchRegex(pattern, safe_substring(text, i)) {
-              r = true
-            }
-          }
-          text.to_array()[:].eachi(judge)
-          r
-        }
+    p => match safe_char_at(p, 0) {
+      // Quantifications
+      Some('^') => matchRegex(safe_substring(p, 1), text)
+      Some(_) if text.is_empty() => matchRegex(p, text)
+      _ => {
+        // Looping through the text to find a match
+        // This is a naive implementation backtracking algorithm and can
+        // lead to catastrophic backtracking in some cases, but it's simple
+        // and works for basic regex patterns.
+        text
+          .to_array()[:]
+          .mapi(fn (i, _) { matchRegex(p, safe_substring(text, i)) })
+          .contains(true)
       }
     }
   }
@@ -158,14 +176,45 @@ test "choice |" {
 }
 
 test "General test" {
-  // assert_eq!(search("hello", "hello"), true)
-  // assert_eq!(search("hello", "hell"), false)
-  // assert_eq!(search("h.llo", "hello"), true)
-  // assert_eq!(search("h.llo", "hllo"), false)
-  // assert_eq!(search("colou?r", "color"), true)
-  // assert_eq!(search("colou?r", "colouur"), false)
-  // assert_eq!(search("ab*c", "abbbc"), true)
-  // assert_eq!(search("lo$", "hello"), true)
-  // assert_eq!(search("^hi", "ahihi"), false)
+  assert_eq!(search("hello", "hello"), true)
+  assert_eq!(search("hello", "hell"), false)
+  assert_eq!(search("h.llo", "hello"), true)
+  assert_eq!(search("h.llo", "hllo"), false)
+  assert_eq!(search("colou?r", "color"), true)
+  assert_eq!(search("colou?r", "colouur"), false)
+  assert_eq!(search("ab*c", "abbbc"), true)
+  assert_eq!(search("lo$", "hello"), true)
+  assert_eq!(search("^hi", "ahihi"), false)
   assert_eq!(search("foo*", "table football"), true)
 }
+
+// fn random_string(chars: String, len: Int) -> String {
+//   let mut result = ""
+//   let arr = chars.to_array()[:]
+//   let max = arr.length().reinterpret_as_uint()
+//   let r = @random.new()
+//   for _ in 0..=len {
+//     let i = (r.uint() % max).reinterpret_as_int()
+//     result = result + arr[i].to_string()
+//   }
+//   result
+// }
+
+// fn fuzz_regex_engine(iterations: Int) -> Unit {
+//   let charset = "abc.*?$^"
+//   for i in 0..=iterations {
+//     let pattern = random_string(charset, 5)
+//     let text = random_string(charset, 5)
+
+//     let _ = search(pattern, text)  // Panic = test failure
+
+//     if i % 500 == 0 {
+//       println("Fuzz \{i}: pattern = \{pattern}, text = \{text}")
+//     }
+//   }
+// }
+
+// test "Fuzzing test" {
+//   fuzz_regex_engine(5000)
+//   assert_eq!(true, true)
+// }
