@@ -1,0 +1,61 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "antisatori/moon-examples/lib/ch14"
+
+import(
+  "moonbitlang/core/list"
+)
+
+// Values
+
+// Errors
+
+// Types and methods
+pub enum Expression {
+  Number(Int)
+  Plus(Expression, Expression)
+  Minus(Expression, Expression)
+  Multiply(Expression, Expression)
+  Divide(Expression, Expression)
+}
+impl Show for Expression
+
+pub struct Function {
+  name : String
+  params : @list.List[String]
+  result : Int
+  locals : @list.List[String]
+  instructions : @list.List[Instruction]
+}
+impl Show for Function
+
+pub enum Instruction {
+  Const(Value)
+  Add
+  Sub
+  Mul
+  Div
+  Equal
+  Call(String)
+  Local_Get(String)
+  Local_Set(String)
+  If(Int, @list.List[Instruction], @list.List[Instruction])
+}
+impl Eq for Instruction
+impl Show for Instruction
+
+pub struct Program {
+  functions : @list.List[Function]
+  start : String?
+}
+impl Show for Program
+
+pub enum Value {
+  I32(Int)
+}
+impl Eq for Value
+impl Show for Value
+
+// Type aliases
+
+// Traits
+
