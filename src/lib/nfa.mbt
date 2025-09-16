@@ -55,7 +55,7 @@ test {
       Transition(3, Match)
     ])
   }
-  println(example.transitions)
+  println(example)
 }
 // fn tokens2re(tokens: @immut/list.T[ReToken]) -> String {
 //   loop tokens {{

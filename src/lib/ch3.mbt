@@ -16,8 +16,8 @@ fn circle() -> (Double, Double, Double) {
 fn area(radius: Double) -> Double { pi * radius * radius }
 
 test {
-  assert_eq!(circle(), (3.141592653589793, 12.566370614359172, 28.274333882308138))
-  assert_eq!(
+  assert_eq(circle(), (3.141592653589793, 12.566370614359172, 28.274333882308138))
+  assert_eq(
     (area(1.0), area(2.0), area(3.0)),
     (3.141592653589793, 12.566370614359172, 28.274333882308138)
   )
@@ -55,10 +55,10 @@ fn _add_char(ch: Char, str: String) -> String {
 fn add_char(ch: Char, str: String) -> String {
   ch.to_string() + str
 }
-let moonbit: String = add_char(Char::from_int(109), "oonbit")
+let moonbit: String = add_char(Int::unsafe_to_char(109), "oonbit")
 
 test {
-  assert_eq!(moonbit, "moonbit")
+  assert_eq(moonbit, "moonbit")
 }
 
 // Partial Functions
@@ -88,8 +88,8 @@ fn div(a: Int, b: Int) -> Option[Int] {
 let _x: Int? = Some(1)
 
 test {
-  assert_eq!(div(1, 0), None)
-  assert_eq!(div(10, 2), Some(5))
+  assert_eq(div(1, 0), None)
+  assert_eq(div(10, 2), Some(5))
 }
 
 // Definition of Local Functions
@@ -111,7 +111,7 @@ let answer: () -> Int = fn () {
 let x: Int = answer() // 42
 
 test {
-  assert_eq!(x, 42)
+  assert_eq(x, 42)
 }
 
 // Function Types
@@ -131,11 +131,11 @@ fn greeting1(name~: String, location~: String) -> Unit {
 }
 
 test {
-  assert_eq!(greeting1(name="somebody", location="some city"), ())
+  assert_eq(greeting1(name="somebody", location="some city"), ())
   let name = "someone else"
   let location = "another city"
   // `label=label` can be abbreviated as `label~`
-  assert_eq!(greeting1(name=name, location~), ())
+  assert_eq(greeting1(name=name, location~), ())
 }
 
 fn greeting2(name~: String, location~: Option[String] = None) -> Unit {
@@ -146,32 +146,32 @@ fn greeting2(name~: String, location~: Option[String] = None) -> Unit {
 }
 
 test {
-  assert_eq!(greeting2(name="A"), ()) // Hi, A!
-  assert_eq!(greeting2(name="B", location=Some("X")), ()) // Hi, B from X!
+  assert_eq(greeting2(name="A"), ()) // Hi, A!
+  assert_eq(greeting2(name="B", location=Some("X")), ()) // Hi, B from X!
 }
 
 // Lists
 // チュートリアルで使われているリストは無くなっているので、core/immut/listを使う必要があります。
 // https://mooncakes.io/docs/moonbitlang/core/immut/list
-let int_list: @immut/list.T[Int] = @immut/list.of([1, 2, 3])
+let int_list: @list.List[Int] = @list.of([1, 2, 3])
 // let string_list: @immut/list.T[String] = @immut/list.of(["This", "is", "a", "sentence."])
 
 // Construction
 test {
-    let list0 : @immut/list.T[Int] = @immut/list.default() // 空リストを作る
-    assert_eq!(list0.length(), 0)
-    let list1 = @immut/list.of([1, 2, 3, 4, 5]) // 配列からリストを作る
-    assert_eq!(list1.length(), 5)
+    let list0 : @list.List[Int] = @list.default() // 空リストを作る
+    assert_eq(list0.length(), 0)
+    let list1 = @list.of([1, 2, 3, 4, 5]) // 配列からリストを作る
+    assert_eq(list1.length(), 5)
     let list2 = list0.add(3).add(2).add(1) // リストの先頭に要素を追加
-    assert_eq!(list2.to_array(), [1, 2, 3])
-    assert_eq!(@immut/list.repeat(3, 1).to_array(), [1, 1, 1]) // 繰り返し
+    assert_eq(list2.to_array(), [1, 2, 3])
+    assert_eq(@list.repeat(3, 1).to_array(), [1, 1, 1]) // 繰り返し
 }
 // Deconstruction
 test {
-  let head: Option[Int] = @immut/list.head(int_list) // 最初の要素を取得します。全域関数でOption[T]を返します。
-  let tail: @immut/list.T[Int] = @immut/list.tail(int_list) // 最初以外の要素を取得します。
-  assert_eq!(head, Some(1))
-  assert_eq!(tail, @immut/list.of([2, 3]))
+  let head: Option[Int] = int_list.head() // 最初の要素を取得します。全域関数でOption[T]を返します。
+  let tail: @list.List[Int] = int_list.unsafe_tail() // 最初以外の要素を取得します。
+  assert_eq(head, Some(1))
+  assert_eq(tail, @list.of([2, 3]))
 }
 // Pattern Matching
 // match <expr> {
@@ -179,11 +179,8 @@ test {
 //   <pattern 2> => <expr>
 // }
 
-fn head_opt[T](list: @immut/list.T[T]) -> T? {
-  match list {
-    Nil              => None
-    Cons(head, _tail) => Some(head)
-  }
+fn[T] head_opt(list: @list.List[T]) -> T? {
+  list.head()
 }
 
 fn get_or_else(option_int: Int64?, default: Int64) -> Int64 {
@@ -195,15 +192,15 @@ fn get_or_else(option_int: Int64?, default: Int64) -> Int64 {
 
 test {
   // let int_list = @list.empty()
-  let arr = match int_list {
-    Cons(head, _tail) => [head]
-    Nil => []
+  let arr = match int_list.head() {
+    Some(head) => [head]
+    None => []
   }
-  assert_eq!(arr, [1])
-  let first_elem: Int? = head_opt(Cons(1, Cons(2, Nil)))
-  assert_eq!(first_elem, Some(1))
-  assert_eq!(get_or_else(Some(1), 0), 1)
-  assert_eq!(get_or_else(None, 0), 0)
+  assert_eq(arr, [1])
+  let first_elem: Int? = head_opt(@list.of([1, 2]))
+  assert_eq(first_elem, Some(1))
+  assert_eq(get_or_else(Some(1), 0), 1)
+  assert_eq(get_or_else(None, 0), 0)
 }
 
 // Recursion
@@ -224,42 +221,36 @@ fn fib(n: Int) -> Int {
 // }
 
 test {
-  assert_eq!(fib(1), 1)
-  assert_eq!(fib(2), 1)
-  assert_eq!(fib(3), 2)
-  assert_eq!(fib(4), 3)
-  assert_eq!(fib(5), 5)
-  assert_eq!(fib(6), 8)
-  assert_eq!(fib(7), 13)
-  assert_eq!(fib(8), 21)
-  assert_eq!(fib(9), 34)
-  assert_eq!(fib(10), 55)
+  assert_eq(fib(1), 1)
+  assert_eq(fib(2), 1)
+  assert_eq(fib(3), 2)
+  assert_eq(fib(4), 3)
+  assert_eq(fib(5), 5)
+  assert_eq(fib(6), 8)
+  assert_eq(fib(7), 13)
+  assert_eq(fib(8), 21)
+  assert_eq(fib(9), 34)
+  assert_eq(fib(10), 55)
 }
 
 // Recursion on Lists
 
-fn length[T](list: @immut/list.T[T]) -> Int {
-  match list {
-    Nil => 0
-    Cons(_, tl) => 1 + length(tl)
-  }
+fn[T] length(list: @list.List[T]) -> Int {
+  list.length()
 }
 
 test {
-  assert_eq!(length(Cons(1, Cons(2, Nil))), 2)
+  assert_eq(length(@list.of([1, 2])), 2)
 }
 
 // Structural Recursion
 
-fn tail[T](list: @immut/list.T[T]) -> @immut/list.T[T] {
-  match list {
-    Nil => Nil
-    Cons(_, tail) => tail
-  }
+fn[T] tail(list: @list.List[T]) -> @list.List[T] {
+  list.unsafe_tail()
 }
 
 test {
-  assert_eq!(tail(Cons(1, Cons(2, Nil))), Cons(2, Nil))
+  assert_eq(tail(@list.of([1, 2])), @list.of([2]))
 }
 
 // Dynamic Programming
@@ -276,14 +267,14 @@ fn fib2(num : Int) -> Int {
 }
 
 test {
-  assert_eq!(fib2(1), 1)
-  assert_eq!(fib2(2), 1)
-  assert_eq!(fib2(3), 2)
-  assert_eq!(fib2(4), 3)
-  assert_eq!(fib2(5), 5)
-  assert_eq!(fib2(6), 8)
-  assert_eq!(fib2(7), 13)
-  assert_eq!(fib2(8), 21)
-  assert_eq!(fib2(9), 34)
-  assert_eq!(fib2(10), 55)
+  assert_eq(fib2(1), 1)
+  assert_eq(fib2(2), 1)
+  assert_eq(fib2(3), 2)
+  assert_eq(fib2(4), 3)
+  assert_eq(fib2(5), 5)
+  assert_eq(fib2(6), 8)
+  assert_eq(fib2(7), 13)
+  assert_eq(fib2(8), 21)
+  assert_eq(fib2(9), 34)
+  assert_eq(fib2(10), 55)
 }

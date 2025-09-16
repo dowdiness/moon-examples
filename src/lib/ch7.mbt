@@ -10,13 +10,13 @@ let _square: Int = square(x) // square(x)を{ 2 * 2 }に置き換えても同じ
 
 // Commands and Side Effects
 // 副作用は参照透過性を損なってしまう。
-fn init {
-  let x: Int = {
-    println("hello moonbit") // Print once
-    1 + 1 // 2
-  }
-  let z: Int = square(x) // 4
-}
+// fn init {
+//   let x: Int = {
+//     println("hello moonbit") // Print once
+//     1 + 1 // 2
+//   }
+//   let z: Int = square(x) // 4
+// }
 
 // The Unit Type
 // Unit型は値を持たない型で、()で表現されます。Unit型は関数の戻り値がない場合や、return文がない場合に使われます。

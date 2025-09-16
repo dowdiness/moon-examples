@@ -31,7 +31,11 @@
 
 fn safe_substring(s: String, start: Int) -> String {
   if start <= s.length() {
-    s.substring(start=start)
+    try {
+      s[start:].to_string()
+    } catch {
+      _ => ""
+    }
   } else {
     ""
   }

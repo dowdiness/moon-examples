@@ -22,23 +22,23 @@
 
 // Circular Queues
 
-struct QueueInt {
-  array: Array[Int] // 要素を格納する配列
-  mut start: Int // 最初の要素のインデックス
-  mut end: Int // 最後の要素のインデックス
-  mut length: Int // queueの要素数
-}
+// priv struct QueueInt {
+//   array: Array[Int] // 要素を格納する配列
+//   mut start: Int // 最初の要素のインデックス
+//   mut end: Int // 最後の要素のインデックス
+//   mut length: Int // queueの要素数
+// }
 
-fn pushInt(self: QueueInt, t: Int) -> QueueInt {
-  self.array[self.end] = t
-  self.end = (self.end + 1) % self.array.length() // 配列の持てる要素数を超えたら最初に戻る
-  self.length += 1
-  self
-}
+// fn pushInt(self: QueueInt, t: Int) -> QueueInt {
+//   self.array[self.end] = t
+//   self.end = (self.end + 1) % self.array.length() // 配列の持てる要素数を超えたら最初に戻る
+//   self.length += 1
+//   self
+// }
 
-fn lengthInt(self: QueueInt) -> Int {
-  self.length
-}
+// fn lengthInt(self: QueueInt) -> Int {
+//   self.length
+// }
 
 // Generic Circular Queues
 
@@ -60,11 +60,24 @@ struct Queue[T] {
 //   }
 // }
 
-fn push[T](self: Queue[T], t: T) -> Queue[T] {
+fn[T] push(self: Queue[T], t: T) -> Queue[T] {
   self.array[self.end] = t
+  self.start = self.start
   self.end = (self.end + 1) % self.array.length() // 配列の持てる要素数を超えたら最初に戻る
-  self.length += 1
+  self.length = self.length + 1
   self
+}
+
+test {
+  let mut q: Queue[Int] = {
+    array: Array::make(5, 0), // 配列の初期化
+    start: 0,
+    end: 0,
+    length: 0
+  }
+  q = q.push(1)
+  q = q.push(2)
+  assert_eq(q.length, 2)
 }
 
 // fn length[T](self: Queue[T]) -> Int {
@@ -83,15 +96,15 @@ pub struct LinkedList[T] {
   mut tail : Option[Node[T]]
 }
 
-pub fn LinkedList::make[T]() -> LinkedList[T] {
+pub fn[T] LinkedList::make() -> LinkedList[T] {
   { head: None, tail: None }
 }
 
-pub fn LinkedList::push[T](self: LinkedList[T], val: T) -> LinkedList[T] {
+pub fn[T] LinkedList::push(self: LinkedList[T], val: T) -> LinkedList[T] {
   let node = { val, next: None }
   match self.tail {
     None => {
-      self.head = Some(node)
+      self.head = Some({ val: node.val, next: node.next })
       self.tail = Some(node)
     }
     Some(n) => {
@@ -102,7 +115,7 @@ pub fn LinkedList::push[T](self: LinkedList[T], val: T) -> LinkedList[T] {
   self
 }
 
-pub fn LinkedList::length[T](self: LinkedList[T]) -> Int {
+pub fn[T] LinkedList::length(self: LinkedList[T]) -> Int {
   // 末尾再帰が行われておらずスタックオーバーフローになる可能性のある再帰関数の例
   // エラー文
   // RangeError: Maximum call stack size exceeded
@@ -142,5 +155,5 @@ test {
     let _ = list.push(i)
     i += 1
   }
-  assert_eq!(list.length(), 100000)
+  assert_eq(list.length(), 100000)
 }

@@ -3,10 +3,10 @@
 
 // Methods
 
-enum Tree[T] {
-  Empty
-  Node(T, Tree[T], Tree[T])
-}
+// priv enum Tree[T] {
+//   Empty
+//   Node(T, Tree[T], Tree[T])
+// }
 
 // We need a comparison function to determine the order of values
 // -1: less than; 0: equal to; 1: greater than
@@ -27,7 +27,7 @@ trait Default {
 
 // Bounded Generics
 
-pub fn make[T: Default]() -> Queue[T] { // `T` should support the `default` method.
+pub fn[T: Default] make() -> Queue[T] { // `T` should support the `default` method.
   {
     array: Array::make(5, T::default()), // The return type of `default` is `T`.
     start: 0,  end: 0,  length: 0
