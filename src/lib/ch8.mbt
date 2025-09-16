@@ -89,22 +89,26 @@ test {
 struct Node[T] {
   val : T
   mut next : Option[Node[T]]
-}
+} derive(Show, Eq)
 
 pub struct LinkedList[T] {
   mut head : Option[Node[T]]
   mut tail : Option[Node[T]]
+} derive(Show, Eq)
+
+pub impl[T] Default for LinkedList[T] with default() -> LinkedList[T] {
+  { head: None, tail: None }
 }
 
 pub fn[T] LinkedList::make() -> LinkedList[T] {
-  { head: None, tail: None }
+  LinkedList::default()
 }
 
 pub fn[T] LinkedList::push(self: LinkedList[T], val: T) -> LinkedList[T] {
   let node = { val, next: None }
   match self.tail {
     None => {
-      self.head = Some({ val: node.val, next: node.next })
+      self.head = Some(node)
       self.tail = Some(node)
     }
     Some(n) => {
@@ -148,7 +152,7 @@ pub fn[T] LinkedList::length(self: LinkedList[T]) -> Int {
 
 // LinkedListのテスト
 test {
-  let list = LinkedList::make()
+  let list = LinkedList::default()
   let mut i = 0
   // 末尾最適化を行うとスタックオーバーフローにならない
   while i < 100000 {
