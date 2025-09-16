@@ -19,8 +19,8 @@ priv enum ReToken {
   PLUS // '+' one or more
   CHARA(Char) // literal
 } derive (Eq, Show)
-fn re2tokens(input: String) -> @immut/list.T[ReToken] {
-  loop (input[:], @immut/list.default()) {
+fn re2tokens(input: String) -> @list.List[ReToken] {
+  loop (input[:], @list.default()) {
     (['.', ..rest], acc) => continue (rest, acc.add(ANY))
     (['|', ..rest], acc) => continue (rest, acc.add(ALT))
     (['*', ..rest], acc) => continue (rest, acc.add(STAR))
@@ -38,22 +38,23 @@ pub(all) enum Instruct {
   Match
 } derive (Show)
 
-priv type Transition (Int, Instruct) derive(Show)
+priv struct Transition (Int, Instruct) derive(Show)
 
 priv struct NFA {
   start: Int // Start state
-  transitions: @immut/list.T[Transition] // Final state
+  transitions: @list.List[Transition] // Final state
 } derive(Show)
 
 test {
   let example: NFA = {
     start: 0,
-    transitions: @immut/list.of([
-      (0, Branch(1, 3)),
-      (1, Character('a', 3)),
-      (2, Eps(0)),
-      (3, Match)
-    ])}
+    transitions: @list.of([
+      Transition(0, Branch(1, 3)),
+      Transition(1, Character('a', 3)),
+      Transition(2, Eps(0)),
+      Transition(3, Match)
+    ])
+  }
   println(example.transitions)
 }
 // fn tokens2re(tokens: @immut/list.T[ReToken]) -> String {
@@ -64,8 +65,8 @@ test {
 // }
 
 test "re2token" {
-  assert_eq!(re2tokens("a"), @immut/list.of([CHARA('a')]))
-  assert_eq!(re2tokens("a.c"), @immut/list.of([CHARA('a'), ANY, CHARA('c')]))
-  assert_eq!(re2tokens("ab+|c"), @immut/list.of([CHARA('a'), CHARA('b'), PLUS, ALT, CHARA('c')]))
-  assert_eq!(re2tokens("z*p?"), @immut/list.of([CHARA('z'), STAR, CHARA('p'), QUESTION]))
+  assert_eq(re2tokens("a"), @list.of([CHARA('a')]))
+  assert_eq(re2tokens("a.c"), @list.of([CHARA('a'), ANY, CHARA('c')]))
+  assert_eq(re2tokens("ab+|c"), @list.of([CHARA('a'), CHARA('b'), PLUS, ALT, CHARA('c')]))
+  assert_eq(re2tokens("z*p?"), @list.of([CHARA('z'), STAR, CHARA('p'), QUESTION]))
 }

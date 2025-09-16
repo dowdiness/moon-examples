@@ -146,7 +146,10 @@ fn advance(self : Lexer) -> Unit {
   if self.position >= self.input.length() {
     self.current_char = None
   } else {
-    self.current_char = Some(self.input[self.position])
+    match Int::to_char(self.input.at(self.position)) {
+      Some(ch) => self.current_char = Some(ch)
+      None => self.current_char = None
+    }
     self.position += 1
   }
 }
@@ -220,12 +223,12 @@ fn skip_comment(self : Lexer) -> Unit {
 
 ///|
 fn read_identifier(self : Lexer) -> String {
-  loop self.current_char, "" {
-    Some(c), acc if c.is_numeric() || c.is_ascii_alphabetic() || c == '_' => {
+  loop (self.current_char, "") {
+    (Some(c), acc) if c.is_numeric() || c.is_ascii_alphabetic() || c == '_' => {
       self.advance()
-      continue self.current_char, acc + c.to_string()
+      continue (self.current_char, acc + c.to_string())
     }
-    _, acc => break acc
+    (_, acc) => break acc
   }
 }
 
@@ -233,23 +236,23 @@ fn read_identifier(self : Lexer) -> String {
 fn read_quoted_string(self : Lexer) -> String {
   let quote_char = self.current_char.unwrap()
   self.advance() // Skip opening quote
-  let result = loop self.current_char, "" {
-    Some(c), acc if c == quote_char => break acc // End of string
-    Some('\\'), acc => {
+  let result = loop (self.current_char, "") {
+    (Some(c), acc) if c == quote_char => break acc // End of string
+    (Some('\\'), acc) => {
       self.advance() // Skip escape character
       match self.current_char {
         Some(escaped_char) => {
           self.advance()
-          continue self.current_char, acc + escaped_char.to_string()
+          continue (self.current_char, acc + escaped_char.to_string())
         }
         None => break acc // Unexpected end of input
       }
     }
-    Some(c), acc => {
+    (Some(c), acc) => {
       self.advance()
-      continue self.current_char, acc + c.to_string()
+      continue (self.current_char, acc + c.to_string())
     }
-    None, acc => break acc // End of input
+    (None, acc) => break acc // End of input
   }
 
   // Skip closing quote
@@ -640,19 +643,19 @@ fn parse_stmt_list(self : Parser) -> Array[Statement] {
 ///|
 fn parse_subgraph(self : Parser) -> Subgraph? {
   // Optional "subgraph" keyword
-  let id = loop self.current_token, None {
-    Subgraph, id => {
+  let id = loop (self.current_token, None) {
+    (Subgraph, id) => {
       self.eat(Subgraph) |> ignore
       // Optional ID after subgraph
       match self.current_token {
         ID(sub_id) => {
           self.eat(ID("")) |> ignore
-          continue self.current_token, Some(sub_id)
+          continue (self.current_token, Some(sub_id))
         }
-        _ => continue self.current_token, id
+        _ => continue (self.current_token, id)
       }
     }
-    _, id => break id
+    (_, id) => break id
   }
   if (self.eat(LeftBrace) |> not) {
     return None
@@ -770,14 +773,14 @@ fn format_statement(stmt : Statement) -> String {
       result
     }
     EdgeStmt(start_node, edges, attr_list) => {
-      let mut result = loop edges[:], start_node.id {
-        [], acc => break acc
-        [(edge_op, node_id), .. rest], acc => {
+      let mut result = loop (edges[:], start_node.id) {
+        ([], acc) => break acc
+        ([(edge_op, node_id), .. rest], acc) => {
           let op_str = match edge_op {
             Directed => " -> "
             Undirected => " -- "
           }
-          continue rest, acc + op_str + node_id.id
+          continue (rest, acc + op_str + node_id.id)
         }
       }
       match attr_list {

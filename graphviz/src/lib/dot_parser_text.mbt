@@ -1,45 +1,45 @@
 ///|
 test "dot_parse" {
-  let dot_source =
-    #|  strict graph id_for_test_100 {
-    #|    a -- b
-    #|    a -- b
-    #|    b -- a [color=blue]
-    #|  }
-  let dot_cluster =
-    #| digraph {
-    #|   node [shape=rect];
-    #|   subgraph {
-    #|     cluster=true;
-    #|     color=blue;
-    #|     node [
-    #|       shape=ellipse,
-    #|       style=filled,
-    #|       color=blue,
-    #|       fontcolor=white
-    #|     ];
-    #|     a1 -> a2 -> a3;
-    #|   }
-    #|   subgraph {
-    #|     cluster=true;
-    #|     bgcolor=lightgreen;
-    #|     node [
-    #|       shape=ellipse,
-    #|       style=filled,
-    #|       color=yellow,
-    #|       fontcolor=black
-    #|     ];
-    #|     b1 -> b2 -> b3;
-    #|     b2:e -> b1;
-    #|     b2 [shape=diamond];
-    #|   }
-    #|   start -> a1;
-    #|   start -> b1;
-    #|   a3 -> end;
-    #|   b3 -> end;
-    #|   start [style=filled, color=green, fontcolor=white];
-    #|   end [color=red];
-    #| }
+  // let dot_source =
+  //   #|  strict graph id_for_test_100 {
+  //   #|    a -- b
+  //   #|    a -- b
+  //   #|    b -- a [color=blue]
+  //   #|  }
+  // let dot_cluster =
+  //   #| digraph {
+  //   #|   node [shape=rect];
+  //   #|   subgraph {
+  //   #|     cluster=true;
+  //   #|     color=blue;
+  //   #|     node [
+  //   #|       shape=ellipse,
+  //   #|       style=filled,
+  //   #|       color=blue,
+  //   #|       fontcolor=white
+  //   #|     ];
+  //   #|     a1 -> a2 -> a3;
+  //   #|   }
+  //   #|   subgraph {
+  //   #|     cluster=true;
+  //   #|     bgcolor=lightgreen;
+  //   #|     node [
+  //   #|       shape=ellipse,
+  //   #|       style=filled,
+  //   #|       color=yellow,
+  //   #|       fontcolor=black
+  //   #|     ];
+  //   #|     b1 -> b2 -> b3;
+  //   #|     b2:e -> b1;
+  //   #|     b2 [shape=diamond];
+  //   #|   }
+  //   #|   start -> a1;
+  //   #|   start -> b1;
+  //   #|   a3 -> end;
+  //   #|   b3 -> end;
+  //   #|   start [style=filled, color=green, fontcolor=white];
+  //   #|   end [color=red];
+  //   #| }
   let dot_automaton =
     #|digraph {
     #|  graph [rankdir=LR];
@@ -61,7 +61,7 @@ test "dot_parse" {
     #|  4 -> 4 [label=a];
     #|  6 -> 7 [label=b];
     #|}
-  match parse_dot(dot_cluster) {
+  match parse_dot(dot_automaton) {
     Some(graph) => {
       println("Parsed successfully:")
       println("graph structure:")
