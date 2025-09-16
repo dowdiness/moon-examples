@@ -29,14 +29,6 @@
 // - Named groups (?P<name>...) are not supported in this implementation
 // - Possessive quantifiers (*+, ?+, ++, etc.) are not supported in this implementation
 
-fn safe_char_at(s: String, i: Int) -> Option[Char] {
-  if i < s.length() {
-    Some(s.char_at(i))
-  } else {
-    None
-  }
-}
-
 fn safe_substring(s: String, start: Int) -> String {
   if start <= s.length() {
     s.substring(start=start)
@@ -57,10 +49,10 @@ fn matchRegex(pattern: String, text: String) -> Bool {
   match pattern {
     "" => true
     "$" if text.is_empty() => true
-    _ => match safe_char_at(pattern, 1) {
+    _ => match pattern.get_char(1) {
       Some('?') => matchQuestionMark(pattern, text)
       Some('*') => matchStar(pattern, text)
-      _ => match (safe_char_at(pattern, 0), safe_char_at(text, 0)) {
+      _ => match (pattern.get_char(0), text.get_char(0)) {
         (Some(pc), Some(tc)) if matchChar(pc, tc) =>
           matchRegex(safe_substring(pattern, 1), safe_substring(text, 1))
         _ => false
@@ -70,7 +62,7 @@ fn matchRegex(pattern: String, text: String) -> Bool {
 }
 
 fn matchQuestionMark(pattern: String, text: String) -> Bool {
-  match (safe_char_at(pattern, 0), safe_char_at(text, 0)) {
+  match (pattern.get_char(0), text.get_char(0)) {
     (Some(pc), Some(tc)) if matchChar(pc, tc) =>
       matchRegex(safe_substring(pattern, 2), safe_substring(text, 1))
     _ => matchRegex(safe_substring(pattern, 2), text)
@@ -78,7 +70,7 @@ fn matchQuestionMark(pattern: String, text: String) -> Bool {
 }
 
 fn matchStar(pattern: String, text: String) -> Bool {
-  match (safe_char_at(pattern, 0), safe_char_at(text, 0)) {
+  match (pattern.get_char(0), text.get_char(0)) {
     (Some(pc), Some(tc)) if matchChar(pc, tc) =>
       matchRegex(safe_substring(pattern, 2), text) ||
       matchStar(pattern, safe_substring(text, 1))
@@ -97,7 +89,7 @@ fn search(pattern: String, text: String) -> Bool {
         search(p.to_string(), text)
       })
       .contains(true)
-    p => match safe_char_at(p, 0) {
+    p => match p.get_char(0) {
       // Quantifications
       Some('^') => matchRegex(safe_substring(p, 1), text)
       Some(_) if text.is_empty() => matchRegex(p, text)
@@ -116,76 +108,76 @@ fn search(pattern: String, text: String) -> Bool {
 }
 
 test "MatchOneCharacter" {
-  assert_eq!(search("a", "a"), true)
-  assert_eq!(search("a", "b"), false)
-  assert_eq!(search("aa", "aa"), true)
-  assert_eq!(search("", "a"), true)
-  assert_eq!(search("p", ""), false)
-  assert_eq!(search(".", "a"), true)
+  assert_eq(search("a", "a"), true)
+  assert_eq(search("a", "b"), false)
+  assert_eq(search("aa", "aa"), true)
+  assert_eq(search("", "a"), true)
+  assert_eq(search("p", ""), false)
+  assert_eq(search(".", "a"), true)
 }
 
 test "Wildcard" {
-  assert_eq!(search("h.llo", "hello"), true)
-  assert_eq!(search("h.llo", "hallo"), true)
-  assert_eq!(search("h.llo", "hllo"), false)
-  assert_eq!(search(".", "A"), true)  // single dot matches any one char
-  assert_eq!(search(".", ""), false)  // dot cannot match empty string
+  assert_eq(search("h.llo", "hello"), true)
+  assert_eq(search("h.llo", "hallo"), true)
+  assert_eq(search("h.llo", "hllo"), false)
+  assert_eq(search(".", "A"), true)  // single dot matches any one char
+  assert_eq(search(".", ""), false)  // dot cannot match empty string
 }
 
 // $
 test "$ anchor" {
-  assert_eq!(search("$", "a"), false)
-  assert_eq!(search("$", ""), true)
-  assert_eq!(search("lo$", "hello"), true)
-  assert_eq!(search("lo$", "lo!"), false)
+  assert_eq(search("$", "a"), false)
+  assert_eq(search("$", ""), true)
+  assert_eq(search("lo$", "hello"), true)
+  assert_eq(search("lo$", "lo!"), false)
 }
 
 // ^
 test "^ anchor"{
-  assert_eq!(search("^", "a"), true)
-  assert_eq!(search("^abc", "abc"), true)
-  assert_eq!(search("^abcd", "abcd"), true)
-  assert_eq!(search("bc", "abcd"), true)
+  assert_eq(search("^", "a"), true)
+  assert_eq(search("^abc", "abc"), true)
+  assert_eq(search("^abcd", "abcd"), true)
+  assert_eq(search("bc", "abcd"), true)
 }
 
 // ?
 test "Optional ?" {
-  assert_eq!(search("ab?c", "ac"), true)
-  assert_eq!(search("ab?c", "abc"), true)
-  assert_eq!(search("a?b?c?", "abc"), true)
-  assert_eq!(search("a?b?c?", ""), true)
+  assert_eq(search("ab?c", "ac"), true)
+  assert_eq(search("ab?c", "abc"), true)
+  assert_eq(search("a?b?c?", "abc"), true)
+  assert_eq(search("a?b?c?", ""), true)
 }
 
 test "Kleene Star *" {
   // * means preceding char repeated 0 or more times
-  assert_eq!(search("ab*c", "ac"), true)
-  assert_eq!(search("ab*c", "abc"), true)
-  assert_eq!(search("ab*c", "abbbbbc"), true)
-  assert_eq!(search("ab*c", "abbxd"), false)
+  assert_eq(search("ab*c", "ac"), true)
+  assert_eq(search("ab*c", "abc"), true)
+  assert_eq(search("ab*c", "abbbbbc"), true)
+  assert_eq(search("ab*c", "abbxd"), false)
 }
 
 test "choice |" {
-  assert_eq!(search("a|b", "a"), true)
-  assert_eq!(search("a|b", "b"), true)
-  assert_eq!(search("a|b", "c"), false)
-  assert_eq!(search("a|b|c", "c"), true)
-  assert_eq!(search("a|b|c", "d"), false)
-  assert_eq!(search("abc|def", "abc"), true)
-  assert_eq!(search("abc|def", "def"), true)
-  assert_eq!(search("abc|def", "gh"), false)
+  assert_eq(search("a|b", "a"), true)
+  assert_eq(search("a|b", "b"), true)
+  assert_eq(search("a|b", "c"), false)
+  assert_eq(search("a|b|c", "c"), true)
+  assert_eq(search("a|b|c", "d"), false)
+  assert_eq(search("abc|def", "abc"), true)
+  assert_eq(search("abc|def", "def"), true)
+  assert_eq(search("abc|def", "gh"), false)
 }
 
 test "General test" {
-  assert_eq!(search("hello", "hello"), true)
-  assert_eq!(search("hello", "hell"), false)
-  assert_eq!(search("h.llo", "hello"), true)
-  assert_eq!(search("h.llo", "hllo"), false)
-  assert_eq!(search("colou?r", "color"), true)
-  assert_eq!(search("colou?r", "colouur"), false)
-  assert_eq!(search("ab*c", "abbbc"), true)
-  assert_eq!(search("lo$", "hello"), true)
-  assert_eq!(search("^hi", "ahihi"), false)
-  assert_eq!(search("foo*", "table football"), true)
+  assert_eq(search("hello", "hello"), true)
+  assert_eq(search("hello", "hell"), false)
+  assert_eq(search("h.llo", "hello"), true)
+  assert_eq(search("h.llo", "hllo"), false)
+  assert_eq(search("colou?r", "color"), true)
+  assert_eq(search("colou?r", "colouur"), false)
+  assert_eq(search("ab*c", "abbbc"), true)
+  assert_eq(search("lo$", "hello"), true)
+  assert_eq(search("^hi", "ahihi"), false)
+  assert_eq(search("foo*", "table football"), true)
 }
 
 // fn random_string(chars: String, len: Int) -> String {
@@ -216,5 +208,5 @@ test "General test" {
 
 // test "Fuzzing test" {
 //   fuzz_regex_engine(5000)
-//   assert_eq!(true, true)
+//   assert_eq(true, true)
 // }
