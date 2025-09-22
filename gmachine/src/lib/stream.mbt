@@ -1,31 +1,31 @@
 // https://docs.moonbitlang.com/en/latest/example/gmachine/gmachine-1.html#g-machine-overview
 
-priv enum Stream[T] {
-  Empty
+pub enum Stream[T] {
+  Nil
   Cons(T, () -> Stream[T]) // (redex, thunk) thunk部分の無名関数により遅延評価を実現している
 }
 
-fn Stream::from_list[T](l: @immut/list.T[T]) -> Stream[T] {
+pub fn[T] Stream::from_list(l: @list.List[T]) -> Stream[T] {
   match l {
-    @immut/list.Nil => Empty
-    @immut/list.Cons(head, tail) => Cons(head, fn () { Stream::from_list(tail) })
+    @list.Empty => Nil
+    @list.More(head, tail~) => Cons(head, fn () { Stream::from_list(tail) })
   }
 }
 
-fn map[X, Y](self: Stream[X], f: (X) -> Y) -> Stream[Y] {
+pub fn[X, Y] map(self: Stream[X], f: (X) -> Y) -> Stream[Y] {
   match self {
-    Empty => Empty
+    Nil => Nil
     Cons(head, tail) => Cons(f(head), fn () { tail().map(f) })
   }
 }
 
-fn take[T](self: Stream[T], n: Int) -> @immut/list.T[T] {
+pub fn[T] take(self: Stream[T], n: Int) -> @list.List[T] {
   if n <= 0 {
-    @immut/list.Nil
+    @list.new()
   } else {
     match self {
-      Empty => @immut/list.Nil
-      Cons(head, tail) => @immut/list.Cons(head, tail().take(n - 1))
+      Nil => @list.new()
+      Cons(head, tail) => @list.cons(head, tail().take(n - 1))
     }
   }
 }
