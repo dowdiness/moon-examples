@@ -1,3 +1,5 @@
+typealias @env.Env
+
 ///|
 test "identity function" {
   let term = example()

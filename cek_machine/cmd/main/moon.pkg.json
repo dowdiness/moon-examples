@@ -4,6 +4,7 @@
     {
       "path": "antisatori/cek_machine",
       "alias": "lib"
-    }
+    },
+    "antisatori/cek_machine/env"
   ]
 }

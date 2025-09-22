@@ -1,4 +1,6 @@
+typealias @env.Env
+
 ///|
 fn main {
-  println(@lib.eval(@lib.example(), @lib.Env::new()))
+  println(@lib.eval(@lib.example(), Env::new()))
 }
