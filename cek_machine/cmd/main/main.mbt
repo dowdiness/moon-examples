@@ -2,5 +2,9 @@ typealias @env.Env
 
 ///|
 fn main {
-  println(@lib.eval(@lib.example(), Env::new()))
+  try @lib.eval(@lib.example(), Env::new()) catch {
+    @lib.EvalError(msg) => println("Error: " + msg)
+  } noraise {
+    v => println(v)
+  }
 }

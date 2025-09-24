@@ -3,12 +3,19 @@
 
 typealias @env.Env
 
+pub(all) suberror EvalError String
+
+/// lambda calculus
+///  <expr> ::= (λ (<var>) <expr>)
+///      |  <var>
+///      |  (<expr> <expr>)
 pub enum Term {
   App(Term, Term)
   Lam(String, Term)
   Var(String)
 } derive(Show, Eq)
 
+/// Identity function
 pub fn identity() -> Term {
   Lam("x", Var("x"))
 }
@@ -22,24 +29,41 @@ pub enum Value {
 } derive(Show, Eq)
 
 // CE for Control, E for Environment
-pub fn eval(term: Term, env: Env[Value]) -> Value? {
+pub fn eval(term: Term, env: Env[Value]) -> Value raise EvalError {
   match term {
-    Var(x) => env.get(x)
-    Lam(x, body) => Some(Closure(env, x, body))
+    Var(x) => match env.get(x) {
+      Some(v) => v
+      None => raise EvalError("Unbound variable: " + x)
+    }
+    Lam(x, body) => Closure(env, x, body)
     App(func, arg) => {
       // Evaluate the function and argument
-      let (func_env, name, body) = match eval(func, env) {
-        Some(Closure(func_env, name, body)) => (func_env, name, body)
-        _ => return None
-      }
-      let evaled_arg = match eval(arg, env) {
-        Some(v) => v
-        None => return None
-      };
+      let Closure(func_env, name, body) = eval(func, env)
+      let evaled_arg = eval(arg, env)
       // Create a new environment with the argument bound to the parameter name
       let new_env = func_env.add(name, evaled_arg)
       // Evaluate the body of the function in the new environment
       eval(body, new_env)
+    }
+  }
+}
+
+/// Continuation-passing style evaluator
+pub fn[R] eval_cps(term: Term, env: Env[Value], kont: (Value) -> R?) -> R? {
+  match term {
+    Var(x) => match env.get(x) {
+      Some(v) => kont(v)
+      None => None
+    }
+    Lam(x, body) => kont(Closure(env, x, body))
+    App(func, arg) => {
+      eval_cps(func, env, (v) => {
+        let Closure(func_env, name, body) = v
+        eval_cps(arg, env, (evaled_arg) =>  {
+          let new_env = func_env.add(name, evaled_arg)
+          eval_cps(body, new_env, kont)
+        })
+      })
     }
   }
 }
@@ -50,7 +74,7 @@ pub(all) enum Kont[R] {
   Ar(Env[Value], String, Term, Kont[R])
 } derive(Show)
 
-// CEK for Control, Environment, Kontinuation
+// Defunctionalized version of eval_cps
 pub fn[R] eval_k(term: Term, env: Env[Value], kont: Kont[R]) -> R? {
   match term {
     Var(x) => match env.get(x) {
