@@ -36,12 +36,12 @@ pub fn eval(term: Term, env: Env[Value]) -> Value raise EvalError {
       None => raise EvalError("Unbound variable: " + x)
     }
     Lam(x, body) => Closure(env, x, body)
-    App(func, arg) => {
+    App(e1, e2) => {
       // Evaluate the function and argument
-      let Closure(func_env, name, body) = eval(func, env)
-      let evaled_arg = eval(arg, env)
+      let Closure(e1_env, name, body) = eval(e1, env)
+      let evaled_e2 = eval(e2, env)
       // Create a new environment with the argument bound to the parameter name
-      let new_env = func_env.add(name, evaled_arg)
+      let new_env = e1_env.add(name, evaled_e2)
       // Evaluate the body of the function in the new environment
       eval(body, new_env)
     }
