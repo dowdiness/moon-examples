@@ -1,0 +1,61 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "antisatori/graph/lib"
+
+// Values
+fn[A] circuit(Array[A]) -> Graph[A]
+
+fn[A] clique(Array[A]) -> Graph[A]
+
+fn[A] connect(Graph[A], Graph[A]) -> Graph[A]
+
+fn[A : Eq] edge_count(Graph[A]) -> Int
+
+fn[A : Eq] edge_set(Graph[A]) -> Array[(A, A)]
+
+fn[A] edges(Array[(A, A)]) -> Graph[A]
+
+fn[A] egde(A, A) -> Graph[A]
+
+fn[A] empty() -> Graph[A]
+
+fn[A : Eq] has_edge(Graph[A], A, A) -> Bool
+
+fn[A : Eq] has_vertex(Graph[A], A) -> Bool
+
+fn[A] is_empty(Graph[A]) -> Bool
+
+fn[A, B] map(Graph[A], (A) -> B) -> Graph[B]
+
+fn[A] overlay(Graph[A], Graph[A]) -> Graph[A]
+
+fn[A] path(Array[A]) -> Graph[A]
+
+fn[A : Eq] remove_edge(Graph[A], A, A) -> Graph[A]
+
+fn[A : Eq] remove_vertex(Graph[A], A) -> Graph[A]
+
+fn[A] star(A, Array[A]) -> Graph[A]
+
+fn[A] vertex(A) -> Graph[A]
+
+fn[A : Eq] vertex_count(Graph[A]) -> Int
+
+fn[A : Eq] vertex_set(Graph[A]) -> Array[A]
+
+fn[A] vertices(Array[A]) -> Graph[A]
+
+// Errors
+
+// Types and methods
+pub enum Graph[A] {
+  Empty
+  Vertex(A)
+  Overlay(Graph[A], Graph[A])
+  Connect(Graph[A], Graph[A])
+}
+impl[A : Eq] Eq for Graph[A]
+impl[A : Show] Show for Graph[A]
+
+// Type aliases
+
+// Traits

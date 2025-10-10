@@ -1,13 +1,12 @@
+///|
 test "algebraic graphs" {
   // Test basic algebraic graph operations
   let empty_graph : Graph[Int] = empty()
   let v1 = vertex(1)
   let v2 = vertex(2)
   let _v3 = vertex(3)
-
   let overlaid = overlay(v1, v2)
   let connected = connect(v1, v2)
-
   println("Empty graph: \{empty_graph}")
   println("Vertex 1: \{v1}")
   println("Overlaid (1,2): \{overlaid}")
@@ -20,7 +19,6 @@ test "algebraic graphs" {
   let star_graph = star(0, [1, 2, 3])
   let path_graph = path([1, 2, 3, 4])
   let circuit_graph = circuit([1, 2, 3])
-
   println("Vertices [1,2,3]: \{vertex_list}")
   println("Edges [(1,2),(2,3)]: \{edge_list}")
   println("Triangle clique: \{triangle}")

@@ -2,6 +2,7 @@
 // https://eprints.ncl.ac.uk/file_store/production/239461/EF82F5FE-66E3-4F64-A1AC-A366D1961738.pdf
 
 // Core algebraic graph data type
+///|
 pub enum Graph[A] {
   Empty
   Vertex(A)
@@ -10,27 +11,40 @@ pub enum Graph[A] {
 } derive(Show, Eq)
 
 // Convenience functions for algebraic graphs
+
+///|
 pub fn[A] empty() -> Graph[A] {
   Empty
 }
 
+///|
 pub fn[A] vertex(v : A) -> Graph[A] {
   Vertex(v)
 }
 
+///|
+pub fn[A] egde(x : A, y : A) -> Graph[A] {
+  connect(vertex(x), vertex(y))
+}
+
+///|
 pub fn[A] overlay(x : Graph[A], y : Graph[A]) -> Graph[A] {
   Overlay(x, y)
 }
 
+///|
 pub fn[A] connect(x : Graph[A], y : Graph[A]) -> Graph[A] {
   Connect(x, y)
 }
 
 // Derived operations for algebraic graphs
+
+///|
 pub fn[A] vertices(vs : Array[A]) -> Graph[A] {
   vs.fold(init=empty(), fn(acc, v) { overlay(acc, vertex(v)) })
 }
 
+///|
 pub fn[A] edges(es : Array[(A, A)]) -> Graph[A] {
   es.fold(init=empty(), fn(acc, edge) {
     let (u, v) = edge
@@ -38,11 +52,13 @@ pub fn[A] edges(es : Array[(A, A)]) -> Graph[A] {
   })
 }
 
+///|
 pub fn[A] clique(vs : Array[A]) -> Graph[A] {
   let vertex_graph = vertices(vs)
   connect_all(vertex_graph)
 }
 
+///|
 fn[A] connect_all(g : Graph[A]) -> Graph[A] {
   match g {
     Empty => Empty
@@ -52,6 +68,7 @@ fn[A] connect_all(g : Graph[A]) -> Graph[A] {
   }
 }
 
+///|
 pub fn[A] star(center : A, satellites : Array[A]) -> Graph[A] {
   let center_vertex = vertex(center)
   satellites.fold(init=center_vertex, fn(acc, s) {
@@ -59,6 +76,7 @@ pub fn[A] star(center : A, satellites : Array[A]) -> Graph[A] {
   })
 }
 
+///|
 pub fn[A] path(vs : Array[A]) -> Graph[A] {
   if vs.length() <= 1 {
     vertices(vs)
@@ -75,6 +93,7 @@ pub fn[A] path(vs : Array[A]) -> Graph[A] {
   }
 }
 
+///|
 pub fn[A] circuit(vs : Array[A]) -> Graph[A] {
   if vs.length() <= 1 {
     vertices(vs)
@@ -85,6 +104,8 @@ pub fn[A] circuit(vs : Array[A]) -> Graph[A] {
 }
 
 // Graph properties and algorithms for algebraic graphs
+
+///|
 pub fn[A] is_empty(g : Graph[A]) -> Bool {
   match g {
     Empty => true
@@ -92,6 +113,7 @@ pub fn[A] is_empty(g : Graph[A]) -> Bool {
   }
 }
 
+///|
 pub fn[A : Eq] has_vertex(g : Graph[A], v : A) -> Bool {
   match g {
     Empty => false
@@ -101,10 +123,12 @@ pub fn[A : Eq] has_vertex(g : Graph[A], v : A) -> Bool {
   }
 }
 
+///|
 pub fn[A : Eq] vertex_count(g : Graph[A]) -> Int {
   vertex_set(g).length()
 }
 
+///|
 pub fn[A : Eq] vertex_set(g : Graph[A]) -> Array[A] {
   match g {
     Empty => []
@@ -114,6 +138,7 @@ pub fn[A : Eq] vertex_set(g : Graph[A]) -> Array[A] {
   }
 }
 
+///|
 fn[A : Eq] merge_unique(xs : Array[A], ys : Array[A]) -> Array[A] {
   let result = []
   for x in xs {
@@ -127,6 +152,7 @@ fn[A : Eq] merge_unique(xs : Array[A], ys : Array[A]) -> Array[A] {
   result
 }
 
+///|
 pub fn[A : Eq] edge_set(g : Graph[A]) -> Array[(A, A)] {
   match g {
     Empty => []
@@ -161,15 +187,19 @@ pub fn[A : Eq] edge_set(g : Graph[A]) -> Array[(A, A)] {
   }
 }
 
+///|
 pub fn[A : Eq] edge_count(g : Graph[A]) -> Int {
   edge_set(g).length()
 }
 
+///|
 pub fn[A : Eq] has_edge(g : Graph[A], u : A, v : A) -> Bool {
   edge_set(g).contains((u, v))
 }
 
 // Graph transformation for algebraic graphs
+
+///|
 pub fn[A : Eq] remove_vertex(g : Graph[A], v : A) -> Graph[A] {
   match g {
     Empty => Empty
@@ -179,22 +209,27 @@ pub fn[A : Eq] remove_vertex(g : Graph[A], v : A) -> Graph[A] {
   }
 }
 
+///|
 pub fn[A : Eq] remove_edge(g : Graph[A], u : A, v : A) -> Graph[A] {
   match g {
     Empty => Empty
     Vertex(w) => Vertex(w)
     Overlay(x, y) => overlay(remove_edge(x, u, v), remove_edge(y, u, v))
-    Connect(x, y) => {
+    Connect(x, y) =>
       if has_vertex(x, u) && has_vertex(y, v) {
-        overlay(overlay(x, y), connect(remove_vertex(x, u), remove_vertex(y, v)))
+        overlay(
+          overlay(x, y),
+          connect(remove_vertex(x, u), remove_vertex(y, v)),
+        )
       } else {
         connect(remove_edge(x, u, v), remove_edge(y, u, v))
       }
-    }
   }
 }
 
 // Map function for algebraic graphs
+
+///|
 pub fn[A, B] map(g : Graph[A], f : (A) -> B) -> Graph[B] {
   match g {
     Empty => Empty
