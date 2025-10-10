@@ -1,0 +1,41 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "antisatori/cek_machine/language"
+
+import(
+  "antisatori/cek_machine/env"
+)
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) struct Language[Term, Value] {
+  name : String
+  env : @env.Env[Value]
+  term : Term
+  value : Value
+}
+impl[T, V] Compiler for Language[T, V]
+
+pub(all) enum Location {
+  Location(Position, Position)
+  NoLocation
+}
+impl Eq for Location
+impl Show for Location
+
+pub(all) struct Position {
+  line : Int
+  column : Int
+}
+impl Eq for Position
+impl Show for Position
+
+// Type aliases
+
+// Traits
+pub(open) trait Compiler {
+  eval(Self) -> String
+}
+

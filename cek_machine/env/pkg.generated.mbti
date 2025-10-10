@@ -1,0 +1,22 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "antisatori/cek_machine/env"
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) struct Env[V] {
+  vars : Map[String, V]
+}
+fn[V] Env::add(Self[V], String, V) -> Self[V]
+fn[V] Env::get(Self[V], String) -> V?
+fn[V] Env::new() -> Self[V]
+fn[V] Env::set(Self[V], String, V) -> Unit
+impl[V : Eq] Eq for Env[V]
+impl[V : Show] Show for Env[V]
+
+// Type aliases
+
+// Traits
+

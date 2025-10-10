@@ -1,26 +1,33 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "antisatori/cek_machine"
 
+import(
+  "antisatori/cek_machine/env"
+)
+
 // Values
-fn eval(Term, Env) -> Value?
+fn[R] apply_k(Kont[R], Value) -> R?
+
+fn eval(Term, @env.Env[Value]) -> Value raise EvalError
+
+fn[R] eval_cps(Term, @env.Env[Value], (Value) -> R?) -> R?
+
+fn[R] eval_k(Term, @env.Env[Value], Kont[R]) -> R?
 
 fn example() -> Term
 
 fn identity() -> Term
 
 // Errors
+pub(all) suberror EvalError String
 
 // Types and methods
-pub(all) struct Env {
-  vars : Map[String, Value]
+pub(all) enum Kont[R] {
+  Mt((Value) -> R?)
+  Fn(@env.Env[Value], Term, Kont[R])
+  Ar(@env.Env[Value], String, Term, Kont[R])
 }
-fn Env::add(Self, String, Value) -> Self
-fn Env::contains(Self, String) -> Bool
-fn Env::get(Self, String) -> Value?
-fn Env::new() -> Self
-fn Env::set(Self, String, Value) -> Unit
-impl Eq for Env
-impl Show for Env
+impl[R : Show] Show for Kont[R]
 
 pub enum Term {
   App(Term, Term)
@@ -31,7 +38,7 @@ impl Eq for Term
 impl Show for Term
 
 pub enum Value {
-  Closure(Env, String, Term)
+  Closure(@env.Env[Value], String, Term)
 }
 impl Eq for Value
 impl Show for Value

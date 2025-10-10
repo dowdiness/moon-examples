@@ -1,0 +1,29 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "antisatori/cek_machine/untyped_lambda"
+
+// Values
+fn eval(Array[(String, Binding)], Term) -> Term raise EvalError
+
+fn test_debruijn() -> Unit
+
+// Errors
+type EvalError
+impl Show for EvalError
+
+// Types and methods
+pub enum Binding {
+  NameBind
+}
+
+pub(all) enum Term {
+  Var(Int, Int)
+  Abs(String, Term)
+  App(Term, Term)
+}
+impl Eq for Term
+impl Show for Term
+
+// Type aliases
+
+// Traits
+
