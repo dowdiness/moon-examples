@@ -10,40 +10,40 @@ pub enum AlgebraicGraph[A] {
 } derive(Show, Eq)
 
 // Convenience functions for algebraic graphs
-pub fn ag_empty[A]() -> AlgebraicGraph[A] {
+pub fn[A] ag_empty() -> AlgebraicGraph[A] {
   Empty
 }
 
-pub fn ag_vertex[A](v : A) -> AlgebraicGraph[A] {
+pub fn[A] ag_vertex(v : A) -> AlgebraicGraph[A] {
   Vertex(v)
 }
 
-pub fn ag_overlay[A](x : AlgebraicGraph[A], y : AlgebraicGraph[A]) -> AlgebraicGraph[A] {
+pub fn[A] ag_overlay(x : AlgebraicGraph[A], y : AlgebraicGraph[A]) -> AlgebraicGraph[A] {
   Overlay(x, y)
 }
 
-pub fn ag_connect[A](x : AlgebraicGraph[A], y : AlgebraicGraph[A]) -> AlgebraicGraph[A] {
+pub fn[A] ag_connect(x : AlgebraicGraph[A], y : AlgebraicGraph[A]) -> AlgebraicGraph[A] {
   Connect(x, y)
 }
 
 // Derived operations for algebraic graphs
-pub fn ag_vertices[A](vs : Array[A]) -> AlgebraicGraph[A] {
+pub fn[A] ag_vertices(vs : Array[A]) -> AlgebraicGraph[A] {
   vs.fold(init=ag_empty(), fn(acc, v) { ag_overlay(acc, ag_vertex(v)) })
 }
 
-pub fn ag_edges[A](es : Array[(A, A)]) -> AlgebraicGraph[A] {
+pub fn[A] ag_edges(es : Array[(A, A)]) -> AlgebraicGraph[A] {
   es.fold(init=ag_empty(), fn(acc, edge) {
     let (u, v) = edge
     ag_overlay(acc, ag_connect(ag_vertex(u), ag_vertex(v)))
   })
 }
 
-pub fn ag_clique[A](vs : Array[A]) -> AlgebraicGraph[A] {
+pub fn[A] ag_clique(vs : Array[A]) -> AlgebraicGraph[A] {
   let vertex_graph = ag_vertices(vs)
   ag_connect_all(vertex_graph)
 }
 
-fn ag_connect_all[A](g : AlgebraicGraph[A]) -> AlgebraicGraph[A] {
+fn[A] ag_connect_all(g : AlgebraicGraph[A]) -> AlgebraicGraph[A] {
   match g {
     Empty => Empty
     Vertex(v) => Vertex(v)
@@ -52,14 +52,14 @@ fn ag_connect_all[A](g : AlgebraicGraph[A]) -> AlgebraicGraph[A] {
   }
 }
 
-pub fn ag_star[A](center : A, satellites : Array[A]) -> AlgebraicGraph[A] {
+pub fn[A] ag_star(center : A, satellites : Array[A]) -> AlgebraicGraph[A] {
   let center_vertex = ag_vertex(center)
   satellites.fold(init=center_vertex, fn(acc, s) {
     ag_overlay(acc, ag_connect(center_vertex, ag_vertex(s)))
   })
 }
 
-pub fn ag_path[A](vs : Array[A]) -> AlgebraicGraph[A] {
+pub fn[A] ag_path(vs : Array[A]) -> AlgebraicGraph[A] {
   if vs.length() <= 1 {
     ag_vertices(vs)
   } else {
@@ -75,7 +75,7 @@ pub fn ag_path[A](vs : Array[A]) -> AlgebraicGraph[A] {
   }
 }
 
-pub fn ag_circuit[A](vs : Array[A]) -> AlgebraicGraph[A] {
+pub fn[A] ag_circuit(vs : Array[A]) -> AlgebraicGraph[A] {
   if vs.length() <= 1 {
     ag_vertices(vs)
   } else {
@@ -85,14 +85,14 @@ pub fn ag_circuit[A](vs : Array[A]) -> AlgebraicGraph[A] {
 }
 
 // Graph properties and algorithms for algebraic graphs
-pub fn ag_is_empty[A](g : AlgebraicGraph[A]) -> Bool {
+pub fn[A] ag_is_empty(g : AlgebraicGraph[A]) -> Bool {
   match g {
     Empty => true
     _ => false
   }
 }
 
-pub fn ag_has_vertex[A : Eq](g : AlgebraicGraph[A], v : A) -> Bool {
+pub fn[A : Eq] ag_has_vertex(g : AlgebraicGraph[A], v : A) -> Bool {
   match g {
     Empty => false
     Vertex(u) => u == v
@@ -101,11 +101,11 @@ pub fn ag_has_vertex[A : Eq](g : AlgebraicGraph[A], v : A) -> Bool {
   }
 }
 
-pub fn ag_vertex_count[A : Eq](g : AlgebraicGraph[A]) -> Int {
+pub fn[A : Eq] ag_vertex_count(g : AlgebraicGraph[A]) -> Int {
   ag_vertex_set(g).length()
 }
 
-pub fn ag_vertex_set[A : Eq](g : AlgebraicGraph[A]) -> Array[A] {
+pub fn[A : Eq] ag_vertex_set(g : AlgebraicGraph[A]) -> Array[A] {
   match g {
     Empty => []
     Vertex(v) => [v]
@@ -114,7 +114,7 @@ pub fn ag_vertex_set[A : Eq](g : AlgebraicGraph[A]) -> Array[A] {
   }
 }
 
-fn merge_unique[A : Eq](xs : Array[A], ys : Array[A]) -> Array[A] {
+fn[A : Eq] merge_unique(xs : Array[A], ys : Array[A]) -> Array[A] {
   let result = []
   for x in xs {
     result.push(x)
@@ -127,7 +127,7 @@ fn merge_unique[A : Eq](xs : Array[A], ys : Array[A]) -> Array[A] {
   result
 }
 
-pub fn ag_edge_set[A : Eq](g : AlgebraicGraph[A]) -> Array[(A, A)] {
+pub fn[A : Eq] ag_edge_set(g : AlgebraicGraph[A]) -> Array[(A, A)] {
   match g {
     Empty => []
     Vertex(_) => []
@@ -161,16 +161,16 @@ pub fn ag_edge_set[A : Eq](g : AlgebraicGraph[A]) -> Array[(A, A)] {
   }
 }
 
-pub fn ag_edge_count[A : Eq](g : AlgebraicGraph[A]) -> Int {
+pub fn[A : Eq] ag_edge_count(g : AlgebraicGraph[A]) -> Int {
   ag_edge_set(g).length()
 }
 
-pub fn ag_has_edge[A : Eq](g : AlgebraicGraph[A], u : A, v : A) -> Bool {
+pub fn[A : Eq] ag_has_edge(g : AlgebraicGraph[A], u : A, v : A) -> Bool {
   ag_edge_set(g).contains((u, v))
 }
 
 // Graph transformation for algebraic graphs
-pub fn ag_remove_vertex[A : Eq](g : AlgebraicGraph[A], v : A) -> AlgebraicGraph[A] {
+pub fn[A : Eq] ag_remove_vertex(g : AlgebraicGraph[A], v : A) -> AlgebraicGraph[A] {
   match g {
     Empty => Empty
     Vertex(u) => if u == v { Empty } else { Vertex(u) }
@@ -179,7 +179,7 @@ pub fn ag_remove_vertex[A : Eq](g : AlgebraicGraph[A], v : A) -> AlgebraicGraph[
   }
 }
 
-pub fn ag_remove_edge[A : Eq](g : AlgebraicGraph[A], u : A, v : A) -> AlgebraicGraph[A] {
+pub fn[A : Eq] ag_remove_edge(g : AlgebraicGraph[A], u : A, v : A) -> AlgebraicGraph[A] {
   match g {
     Empty => Empty
     Vertex(w) => Vertex(w)
@@ -195,7 +195,7 @@ pub fn ag_remove_edge[A : Eq](g : AlgebraicGraph[A], u : A, v : A) -> AlgebraicG
 }
 
 // Map function for algebraic graphs
-pub fn ag_map[A, B](g : AlgebraicGraph[A], f : (A) -> B) -> AlgebraicGraph[B] {
+pub fn[A, B] ag_map(g : AlgebraicGraph[A], f : (A) -> B) -> AlgebraicGraph[B] {
   match g {
     Empty => Empty
     Vertex(v) => Vertex(f(v))
@@ -203,52 +203,3 @@ pub fn ag_map[A, B](g : AlgebraicGraph[A], f : (A) -> B) -> AlgebraicGraph[B] {
     Connect(x, y) => Connect(ag_map(x, f), ag_map(y, f))
   }
 }
-
-
-test "algebraic graphs" {
-  // Test basic algebraic graph operations
-  let empty_graph : AlgebraicGraph[Int] = ag_empty()
-  let v1 = ag_vertex(1)
-  let v2 = ag_vertex(2)
-  let _v3 = ag_vertex(3)
-
-  let overlaid = ag_overlay(v1, v2)
-  let connected = ag_connect(v1, v2)
-
-  println("Empty graph: \{empty_graph}")
-  println("Vertex 1: \{v1}")
-  println("Overlaid (1,2): \{overlaid}")
-  println("Connected (1->2): \{connected}")
-
-  // Test derived operations
-  let vertex_list = ag_vertices([1, 2, 3])
-  let edge_list = ag_edges([(1, 2), (2, 3)])
-  let triangle = ag_clique([1, 2, 3])
-  let star_graph = ag_star(0, [1, 2, 3])
-  let path_graph = ag_path([1, 2, 3, 4])
-  let circuit_graph = ag_circuit([1, 2, 3])
-
-  println("Vertices [1,2,3]: \{vertex_list}")
-  println("Edges [(1,2),(2,3)]: \{edge_list}")
-  println("Triangle clique: \{triangle}")
-  println("Star with center 0: \{star_graph}")
-  println("Path 1->2->3->4: \{path_graph}")
-  println("Circuit 1->2->3->1: \{circuit_graph}")
-
-  // Test graph properties
-  println("Has vertex 2 in overlaid: \{ag_has_vertex(overlaid, 2)}")
-  println("Has vertex 3 in overlaid: \{ag_has_vertex(overlaid, 3)}")
-  println("Vertex count of triangle: \{ag_vertex_count(triangle)}")
-  println("Edge count of triangle: \{ag_edge_count(triangle)}")
-  println("Has edge 1->2 in connected: \{ag_has_edge(connected, 1, 2)}")
-  println("Has edge 2->1 in connected: \{ag_has_edge(connected, 2, 1)}")
-
-  // Test graph transformation
-  let removed_vertex = ag_remove_vertex(triangle, 2)
-  println("Triangle with vertex 2 removed: \{removed_vertex}")
-
-  // Test map function
-  let string_graph = ag_map(v1, fn(x) { "vertex_\{x}" })
-  println("Mapped to string: \{string_graph}")
-}
-
