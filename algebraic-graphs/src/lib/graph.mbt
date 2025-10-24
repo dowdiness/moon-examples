@@ -10,6 +10,31 @@ pub enum Graph[A] {
   Connect(Graph[A], Graph[A])
 } derive(Show, Eq)
 
+pub impl [A] Add for Graph[A] with add(self: Graph[A], other: Graph[A]) {
+  Overlay(self, other)
+}
+
+pub impl [A] Mul for Graph[A] with mul(self, other) {
+  Connect(self, other)
+}
+
+pub fn[A, B] foldg(
+  e: B,
+  v: (A) -> B,
+  o: (B, B) -> B,
+  c: (B, B) -> B
+) -> (Graph[A]) -> B {
+  fn go(input: Graph[A]) -> B {
+    match input {
+      Empty => e
+      Vertex(x) => v(x)
+      Overlay(x, y) => o(go(x), go(y))
+      Connect(x, y) => c(go(x), go(y))
+    }
+  }
+  go
+}
+
 // Convenience functions for algebraic graphs
 
 ///|
@@ -24,7 +49,7 @@ pub fn[A] vertex(v : A) -> Graph[A] {
 
 ///|
 pub fn[A] egde(x : A, y : A) -> Graph[A] {
-  connect(vertex(x), vertex(y))
+  Connect(vertex(x), vertex(y))
 }
 
 ///|
