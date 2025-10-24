@@ -1,0 +1,95 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "antisatori/textbook/lib/ch14"
+
+import(
+  "moonbitlang/core/hashmap"
+  "moonbitlang/core/list"
+)
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) enum AdministrativeInstruction {
+  Plain(Instruction)
+  EndOfFrame(Int)
+}
+
+pub enum Expression {
+  Number(Int)
+  Plus(Expression, Expression)
+  Minus(Expression, Expression)
+  Multiply(Expression, Expression)
+  Divide(Expression, Expression)
+}
+fn Expression::output(Self, &Logger) -> Unit // from trait `Show`
+fn Expression::to_string(Self) -> String // from trait `Show`
+impl Show for Expression
+
+pub struct Function {
+  name : String
+  params : @list.List[String]
+  result : Int
+  locals : @list.List[String]
+  instructions : @list.List[Instruction]
+}
+fn Function::output(Self, &Logger) -> Unit // from trait `Show`
+fn Function::to_string(Self) -> String // from trait `Show`
+impl Show for Function
+
+pub(all) enum Instruction {
+  Const(Value)
+  Add
+  Sub
+  Mul
+  Div
+  Equal
+  Call(String)
+  Local_Get(String)
+  Local_Set(String)
+  If(Int, @list.List[Instruction], @list.List[Instruction])
+}
+fn Instruction::equal(Self, Self) -> Bool // from trait `Eq`
+#deprecated
+fn Instruction::op_equal(Self, Self) -> Bool // from trait `Eq`
+fn Instruction::output(Self, &Logger) -> Unit // from trait `Show`
+fn Instruction::to_string(Self) -> String // from trait `Show`
+impl Eq for Instruction
+impl Show for Instruction
+
+pub struct Program {
+  functions : @list.List[Function]
+  start : String?
+}
+fn Program::output(Self, &Logger) -> Unit // from trait `Show`
+fn Program::to_string(Self) -> String // from trait `Show`
+impl Show for Program
+
+pub(all) enum StackValue {
+  Val(Value)
+  Func(@hashmap.HashMap[String, Value])
+}
+
+pub(all) struct State {
+  program : Program
+  stack : @list.List[StackValue]
+  locals : @hashmap.HashMap[String, Value]
+  instructions : @list.List[AdministrativeInstruction]
+}
+
+pub enum Value {
+  I32(Int)
+}
+fn Value::equal(Self, Self) -> Bool // from trait `Eq`
+#deprecated
+fn Value::op_equal(Self, Self) -> Bool // from trait `Eq`
+fn Value::output(Self, &Logger) -> Unit // from trait `Show`
+fn Value::to_string(Self) -> String // from trait `Show`
+impl Eq for Value
+impl Show for Value
+
+// Type aliases
+
+// Traits
+

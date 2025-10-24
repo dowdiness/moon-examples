@@ -1,10 +1,9 @@
 {
-  "name": "antisatori/moon-examples",
+  "name": "antisatori/textbook",
   "version": "0.1.0",
   "readme": "README.md",
   "repository": "",
   "license": "Apache-2.0",
   "keywords": [],
-  "description": "my playground for moonbit language",
-  "source": "src"
+  "description": "my playground for moonbit language"
 }

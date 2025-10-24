@@ -1,0 +1,53 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "antisatori/textbook/lib"
+
+// Values
+fn hello() -> String
+
+fn[T : Default] make() -> Queue[T]
+
+// Errors
+
+// Types and methods
+pub(all) enum Instruct {
+  Eps(Int)
+  Branch(Int, Int)
+  Character(Char, Int)
+  Match
+}
+fn Instruct::output(Self, &Logger) -> Unit // from trait `Show`
+fn Instruct::to_string(Self) -> String // from trait `Show`
+impl Show for Instruct
+
+pub struct LinkedList[T] {
+  mut head : Node[T]?
+  mut tail : Node[T]?
+}
+fn[T : Eq] LinkedList::equal(Self[T], Self[T]) -> Bool // from trait `Eq`
+fn[T] LinkedList::length(Self[T]) -> Int
+fn[T] LinkedList::make() -> Self[T]
+#deprecated
+fn[T : Eq] LinkedList::op_equal(Self[T], Self[T]) -> Bool // from trait `Eq`
+fn[T : Show] LinkedList::output(Self[T], &Logger) -> Unit // from trait `Show`
+fn[T] LinkedList::push(Self[T], T) -> Self[T]
+fn[T : Show] LinkedList::to_string(Self[T]) -> String // from trait `Show`
+impl[T] Default for LinkedList[T]
+impl[T : Eq] Eq for LinkedList[T]
+impl[T : Show] Show for LinkedList[T]
+
+type Node[T]
+fn[T : Eq] Node::equal(Self[T], Self[T]) -> Bool // from trait `Eq`
+#deprecated
+fn[T : Eq] Node::op_equal(Self[T], Self[T]) -> Bool // from trait `Eq`
+fn[T : Show] Node::output(Self[T], &Logger) -> Unit // from trait `Show`
+fn[T : Show] Node::to_string(Self[T]) -> String // from trait `Show`
+impl[T : Eq] Eq for Node[T]
+impl[T : Show] Show for Node[T]
+
+type Queue[T]
+
+// Type aliases
+
+// Traits
+trait Default
+
