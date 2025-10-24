@@ -9,27 +9,41 @@ A regular expression (regex) matches text according to pattern syntax. At its si
 First we handle the simplest case: exact literals. A pattern like "cat" should match only the string "cat" (every character must match in sequence). For example, "cat" should match "cat", but not "cart" or "ca". We write tests first, then code.
 
 ```moonbit
-test {
+test "Literal match" {
   // Literal match: exact equality
-  assert_eq!(regex_match1("hello", "hello"), true) // identical strings match
-  assert_eq!(regex_match1("hello", "hell"), false) // text shorter than pattern fails
-  assert_eq!(regex_match1("hello", "hello!"), false) // extra text fails
+  assert_eq(regex_match1("hello", "hello"), true) // identical strings match
+  assert_eq(regex_match1("hello", "hell"), false) // text shorter than pattern fails
+  assert_eq(regex_match1("hello", "hello!"), false) // extra text fails
 }
 ```
 
 The implementation simply compares characters one by one (here we use recursion). If the pattern is empty, we succeed only if the text is also empty; otherwise we compare the first character and recurse on the remainders. This handles only literal characters (no special operators yet):
 
 ```moonbit
+fn safe_substring(s: String, start: Int) -> String {
+  if start <= s.length() {
+    try {
+      s[start:].to_string()
+    } catch {
+      _ => ""
+    }
+  } else {
+    ""
+  }
+}
+
 fn regex_match1(pattern : String, text : String) -> Bool {
-  match (pattern.view(), text.view()) {
+  match (pattern.get_char(0), text.get_char(0)) {
     // If pattern is empty, match only if text is also empty
-    (p, t) if p.length() == 0 => t.length() == 0
+    (None, None) => true
     // If text is empty but pattern is not, fail
-    (_, t) if t.length() == 0 => false
+    (Some(_), None) => false
+    // If pattern is empty but text is not, fail
+    (None, Some(_)) => false
     // Compare first character: must be identical
-    ([p0, ..], [t0, ..]) if p0 == t0 =>
+    (Some(p0), Some(t0)) if p0 == t0 =>
       // Recurse on the rest of pattern and text
-      regex_match1(pattern.substring(start=1), text.substring(start=1))
+      regex_match1(safe_substring(pattern, 1), safe_substring(text, 1))
     (_, _) => false
   }
 }
@@ -40,14 +54,14 @@ fn regex_match1(pattern : String, text : String) -> Bool {
 Next we add the wildcard `.`, which matches any single character. For example, the pattern "h.llo" should match "hello" and "hallo", but not "hllo" (because the `.` must match one character). We write a test first:
 
 ```moonbit
-test {
+test "Wildcard" {
   // Wildcard . matches any single character
-  assert_eq!(regex_match2("pal", "pal"), true)
-  assert_eq!(regex_match2("h.llo", "hello"), true)
-  assert_eq!(regex_match2("h.llo", "hallo"), true)
-  assert_eq!(regex_match2("h.llo", "hllo"), false)
-  assert_eq!(regex_match2(".", "A"), true) // single dot matches any one char
-  assert_eq!(regex_match2(".", ""), false) // dot cannot match empty string
+  assert_eq(regex_match2("pal", "pal"), true)
+  assert_eq(regex_match2("h.llo", "hello"), true)
+  assert_eq(regex_match2("h.llo", "hallo"), true)
+  assert_eq(regex_match2("h.llo", "hllo"), false)
+  assert_eq(regex_match2(".", "A"), true) // single dot matches any one char
+  assert_eq(regex_match2(".", ""), false) // dot cannot match empty string
 }
 ```
 
@@ -55,12 +69,13 @@ To implement `.` we adjust the character comparison: if the pattern's first char
 
 ```moonbit
 fn regex_match2(pattern : String, text : String) -> Bool {
-  match (pattern.view(), text.view()) {
-    (p, t) if p.length() == 0 => t.length() == 0
-    (_, t) if t.length() == 0 => false
+  match (pattern.get_char(0), text.get_char(0)) {
+    (None, None) => true
+    (Some(_), None) => false
+    (None, Some(_)) => false
     // Dot (.) matches any character
-    ([p0, ..], [t0, ..]) if p0 == t0 || p0 == '.' =>
-      regex_match2(pattern.substring(start=1), text.substring(start=1))
+    (Some(p0), Some(t0)) if p0 == t0 || p0 == '.' =>
+      regex_match2(safe_substring(pattern, 1), safe_substring(text, 1))
     (_, _) => false
   }
 }
@@ -73,14 +88,14 @@ This handles `.` as a "match any char" wildcard. All other behavior remains the 
 Now we add the optional quantifier `?`, which means "zero or one of the preceding element". For example, `colou?r` matches both "color" and "colour". We write tests:
 
 ```moonbit
-test {
+test "Optional ?" {
   // ? means preceding char is optional (0 or 1 times)
-  assert_eq!(regex_match3("colou?r", "color"), true)
-  assert_eq!(regex_match3("colou?r", "colour"), true)
-  assert_eq!(regex_match3("colou?r", "colouur"), false) // two 'u's fail
-  assert_eq!(regex_match3("a?b", "b"), true)
-  assert_eq!(regex_match3("a?b", "ab"), true)
-  assert_eq!(regex_match3("a?b", "aab"), false)
+  assert_eq(regex_match3("colou?r", "color"), true)
+  assert_eq(regex_match3("colou?r", "colour"), true)
+  assert_eq(regex_match3("colou?r", "colouur"), false) // two 'u's fail
+  assert_eq(regex_match3("a?b", "b"), true)
+  assert_eq(regex_match3("a?b", "ab"), true)
+  assert_eq(regex_match3("a?b", "aab"), false)
 }
 ```
 
@@ -91,26 +106,37 @@ To implement `?`, we check if the second character in the pattern is '?'. If so,
 We insert this check at the top of the function before literal matching:
 
 ```moonbit
+fn matchChar(pattern: Char, text: Char) -> Bool {
+  match pattern {
+    '.' => true
+    _ if pattern == text => true
+    _ => false
+  }
+}
+
 fn regex_match3(pattern : String, text : String) -> Bool {
-  match (pattern.view(), text.view()) {
-    (p, t) if p.length() == 0 => t.length() == 0
+  match pattern.get_char(1) {
     // Handle ? quantifier: preceding char is optional
-    ([p0, '?', ..], [t0, ..]) =>
-      // Try skipping the char (0 occurrences)
-      if regex_match3(pattern.substring(start=2), text) {
-        true
-      } else {
-        // Try using it once
-        match (text.length() > 0 && p0 == t0) || p0 == '.' {
-          true =>
-            regex_match3(pattern.substring(start=2), text.substring(start=1))
-          false => false
-        }
+    Some('?') =>
+      match (pattern.get_char(0), text.get_char(0)) {
+        (Some(p0), Some(t0)) if matchChar(p0, t0) =>
+          // Try using it once
+          regex_match3(safe_substring(pattern, 2), safe_substring(text, 1)) ||
+          // Try skipping the char (0 occurrences)
+          regex_match3(safe_substring(pattern, 2), text)
+        _ =>
+          // Try skipping the char (0 occurrences)
+          regex_match3(safe_substring(pattern, 2), text)
       }
-    (_, t) if t.length() == 0 => false
-    ([p0, ..], [t0, ..]) if p0 == t0 || p0 == '.' =>
-      regex_match3(pattern.substring(start=1), text.substring(start=1))
-    (_, _) => false
+    _ =>
+      match (pattern.get_char(0), text.get_char(0)) {
+        (None, None) => true
+        (Some(_), None) => false
+        (None, Some(_)) => false
+        (Some(p0), Some(t0)) if p0 == t0 || p0 == '.' =>
+          regex_match3(safe_substring(pattern, 1), safe_substring(text, 1))
+        (_, _) => false
+      }
   }
 }
 ```
@@ -122,12 +148,12 @@ Now the engine supports `?`. We tested `colou?r`, `a?b`, etc., and it works as e
 Next is the Kleene star `*`, meaning "zero or more of the preceding element". For instance, `ab*c` matches "ac", "abc", "abbbc", and so on. Test cases:
 
 ```moonbit
-test {
+test "Kleene Star *" {
   // * means preceding char repeated 0 or more times
-  assert_eq!(regex_match4("ab*c", "ac"), true)
-  assert_eq!(regex_match4("ab*c", "abc"), true)
-  assert_eq!(regex_match4("ab*c", "abbbbbc"), true)
-  assert_eq!(regex_match4("ab*c", "abbxd"), false)
+  assert_eq(regex_match4("ab*c", "ac"), true)
+  assert_eq(regex_match4("ab*c", "abc"), true)
+  assert_eq(regex_match4("ab*c", "abbbbbc"), true)
+  assert_eq(regex_match4("ab*c", "abbxd"), false)
 }
 ```
 
@@ -139,39 +165,36 @@ Adding this into our function gives the full core engine with `.`, `?`, and `*`:
 
 ```moonbit
 fn regex_match4(pattern : String, text : String) -> Bool {
-  match (pattern.view(), text.view()) {
-    (p, t) if p.length() == 0 => t.length() == 0
+  match pattern.get_char(1) {
     // Handle ? quantifier: preceding char is optional
-    ([p0, '?', ..], [t0, ..]) =>
-      // Try skipping the char (0 occurrences)
-      if regex_match4(pattern.substring(start=2), text) {
-        true
-      } else {
-        // Try using it once
-        match (text.length() > 0 && p0 == t0) || p0 == '.' {
-          true =>
-            regex_match4(pattern.substring(start=2), text.substring(start=1))
-          false => false
-        }
+    Some('?') =>
+      match (pattern.get_char(0), text.get_char(0)) {
+        (Some(p0), Some(t0)) if matchChar(p0, t0) =>
+          regex_match4(safe_substring(pattern, 2), safe_substring(text, 1)) ||
+          regex_match4(safe_substring(pattern, 2), text)
+        _ => regex_match4(safe_substring(pattern, 2), text)
       }
     // Handle * quantifier
-    ([p0, '*', ..], [t0, ..]) =>
-      // Zero occurrences: if pattern is "a*bc", it becomes "bc" after skipping the first two characters
-      if regex_match4(pattern.substring(start=2), text) {
-        true
-      } else {
-        // One or more: check if we have at least one character that matches
-        // For example: if pattern is "b*c" and text is "bbbc",
-        // after one loop the text becomes "bbc" but the pattern stays the same
-        match (text.length() > 0 && p0 == t0) || p0 == '.' {
-          true => regex_match4(pattern, text.substring(start=1))
-          false => false
-        }
+    Some('*') =>
+      match (pattern.get_char(0), text.get_char(0)) {
+        (Some(p0), Some(t0)) if matchChar(p0, t0) =>
+          // Zero occurrences: skip the char* entirely
+          regex_match4(safe_substring(pattern, 2), text) ||
+          // One or more: consume one char but keep pattern
+          regex_match4(pattern, safe_substring(text, 1))
+        _ =>
+          // Zero occurrences
+          regex_match4(safe_substring(pattern, 2), text)
       }
-    (_, t) if t.length() == 0 => false
-    ([p0, ..], [t0, ..]) if p0 == t0 || p0 == '.' =>
-      regex_match4(pattern.substring(start=1), text.substring(start=1))
-    (_, _) => false
+    _ =>
+      match (pattern.get_char(0), text.get_char(0)) {
+        (None, None) => true
+        (Some(_), None) => false
+        (None, Some(_)) => false
+        (Some(p0), Some(t0)) if p0 == t0 || p0 == '.' =>
+          regex_match4(safe_substring(pattern, 1), safe_substring(text, 1))
+        (_, _) => false
+      }
   }
 }
 ```
@@ -183,16 +206,16 @@ This handles all core matching logic. With this engine, our earlier tests and th
 Finally, we add anchors. The caret `^` forces the match to start at the beginning of the text, and the dollar sign `$` forces the match to end at the end of the text. We write tests:
 
 ```moonbit
-test {
+test "Anchors ^ and $" {
   // ^ anchor: pattern must start at beginning
-  assert_eq!(regex_match5("^hello", "hello"), true)
-  assert_eq!(regex_match5("^hello", "ahello"), false)
+  assert_eq(regex_match5("^hello", "hello"), true)
+  assert_eq(regex_match5("^hello", "ahello"), false)
   // $ anchor: pattern must end at end
-  assert_eq!(regex_match5("lo$", "hello"), true)
-  assert_eq!(regex_match5("lo$", "lo!"), false)
+  assert_eq(regex_match5("lo$", "hello"), true)
+  assert_eq(regex_match5("lo$", "lo!"), false)
   // Both anchors: full-string match
-  assert_eq!(regex_match5("^abc$", "abc"), true)
-  assert_eq!(regex_match5("^abc$", "abca"), false)
+  assert_eq(regex_match5("^abc$", "abc"), true)
+  assert_eq(regex_match5("^abc$", "abca"), false)
 }
 ```
 
@@ -211,18 +234,22 @@ fn regex_match5(
   anchoredEnd~ : Bool = false
 ) -> Bool {
   // Handle start (^) and end ($) anchors
-  if pattern.length() > 0 && pattern.has_prefix("^") {
+  if pattern.length() > 0 && pattern.get_char(0) == Some('^') {
     regex_match5(
       // Skip the caret character (^) at the beginning
-      pattern.substring(start=1),
+      safe_substring(pattern, 1),
       text,
       anchoredStart=true,
       anchoredEnd~,
     )
-  } else if pattern.length() > 0 && pattern.has_suffix("$") {
+  } else if pattern.length() > 0 && pattern.get_char(pattern.length() - 1) == Some('$') {
     regex_match5(
       // Skip the last character ($)
-      pattern.substring(start=0, end=pattern.length() - 1),
+      try {
+        pattern[0:pattern.length() - 1].to_string()
+      } catch {
+        _ => ""
+      },
       text,
       anchoredStart~,
       anchoredEnd=true,
@@ -231,44 +258,33 @@ fn regex_match5(
     // Define a helper that matches pattern at the beginning of 't',
     // requiring end of text if anchoredEnd
     fn inner_Match(p : String, t : String, end_anchor : Bool) -> Bool {
-      match (p.view(), t.view()) {
-        // If anchored end, text must be empty. Otherwise success.
-        (p, t) if p.length() == 0 => not(end_anchor) || t.length() == 0
-        // Handle ? quantifier: preceding char is optional (optional)
-        ([p0, '?', ..], [t0, ..]) =>
-          // Try skipping the char (0 occurrences)
-          if inner_Match(p.substring(start=2), t, end_anchor) {
-            true
-          } else {
-            // Try using it once
-            match (t.length() > 0 && p0 == t0) || p0 == '.' {
-              true =>
-                inner_Match(
-                  p.substring(start=2),
-                  t.substring(start=1),
-                  end_anchor,
-                )
-              false => false
-            }
+      match p.get_char(1) {
+        // Handle ? quantifier
+        Some('?') =>
+          match (p.get_char(0), t.get_char(0)) {
+            (Some(p0), Some(t0)) if matchChar(p0, t0) =>
+              inner_Match(safe_substring(p, 2), safe_substring(t, 1), end_anchor) ||
+              inner_Match(safe_substring(p, 2), t, end_anchor)
+            _ => inner_Match(safe_substring(p, 2), t, end_anchor)
           }
-        // Handle * quantifier (zero or more)
-        ([p0, '*', ..], [t0, ..]) =>
-          // Zero occurrences: if pattern is "a*bc", it becomes "bc" after skipping the first two characters
-          if inner_Match(p.substring(start=2), t, end_anchor) {
-            true
-          } else {
-            // One or more: check if we have at least one character that matches
-            // For example: if pattern is "b*c" and text is "bbbc",
-            // after one loop the text becomes "bbc" but the pattern stays the same
-            match (t.length() > 0 && p0 == t0) || p0 == '.' {
-              true => inner_Match(p, t.substring(start=1), end_anchor)
-              false => false
-            }
+        // Handle * quantifier
+        Some('*') =>
+          match (p.get_char(0), t.get_char(0)) {
+            (Some(p0), Some(t0)) if matchChar(p0, t0) =>
+              inner_Match(safe_substring(p, 2), t, end_anchor) ||
+              inner_Match(p, safe_substring(t, 1), end_anchor)
+            _ => inner_Match(safe_substring(p, 2), t, end_anchor)
           }
-        (_, t) if t.length() == 0 => false
-        ([p0, ..], [t0, ..]) if p0 == t0 || p0 == '.' =>
-          inner_Match(p.substring(start=1), t.substring(start=1), end_anchor)
-        (_, _) => false
+        _ =>
+          match (p.get_char(0), t.get_char(0)) {
+            // If pattern is empty, check end anchor
+            (None, None) => not(end_anchor) || true
+            (None, Some(_)) => not(end_anchor)
+            (Some(_), None) => false
+            (Some(p0), Some(t0)) if matchChar(p0, t0) =>
+              inner_Match(safe_substring(p, 1), safe_substring(t, 1), end_anchor)
+            (_, _) => false
+          }
       }
     }
     // If anchored start, only try at position 0
@@ -277,7 +293,7 @@ fn regex_match5(
     }
     // Otherwise, try each starting position
     for i = 0; i <= text.length(); i = i + 1 {
-      if inner_Match(pattern, text.substring(start=i), anchoredEnd) {
+      if inner_Match(pattern, safe_substring(text, i), anchoredEnd) {
         return true
       }
     }
@@ -295,18 +311,22 @@ All together, this MoonBit implementation – built step by step – provides a 
 Here's the complete implementation under 100 lines, including tests:
 
 ```moonbit
-test {
-  assert_eq!(regex_match("hello", "hello"), true)
-  assert_eq!(regex_match("hello", "hell"), false)
-  assert_eq!(regex_match("h.llo", "hello"), true)
-  assert_eq!(regex_match("h.llo", "hllo"), false)
-  assert_eq!(regex_match("colou?r", "color"), true)
-  assert_eq!(regex_match("colou?r", "colouur"), false)
-  assert_eq!(regex_match("ab*c", "abbbc"), true)
-  assert_eq!(regex_match("lo$", "hello"), true)
-  assert_eq!(regex_match("^hi", "ahihi"), false)
-  assert_eq!(regex_match("ab*c", "abc"), true)
+test "General test" {
+  assert_eq(regex_match("hello", "hello"), true)
+  assert_eq(regex_match("hello", "hell"), false)
+  assert_eq(regex_match("h.llo", "hello"), true)
+  assert_eq(regex_match("h.llo", "hllo"), false)
+  assert_eq(regex_match("colou?r", "color"), true)
+  assert_eq(regex_match("colou?r", "colouur"), false)
+  assert_eq(regex_match("ab*c", "abbbc"), true)
+  assert_eq(regex_match("lo$", "hello"), true)
+  assert_eq(regex_match("^hi", "ahihi"), false)
+  assert_eq(regex_match("ab*c", "abc"), true)
 }
+
+// Helper function is defined earlier in the document
+// fn safe_substring(s: String, start: Int) -> String { ... }
+// fn matchChar(pattern: Char, text: Char) -> Bool { ... }
 
 fn regex_match(
   pattern : String,
@@ -315,18 +335,20 @@ fn regex_match(
   anchoredEnd~ : Bool = false
 ) -> Bool {
   // Handle start (^) and end ($) anchors
-  if pattern.has_prefix("^") {
+  if pattern.length() > 0 && pattern.get_char(0) == Some('^') {
     regex_match(
-      // Skip the caret character (^) at the beginning
-      pattern.substring(start=1),
+      safe_substring(pattern, 1),
       text,
       anchoredStart=true,
       anchoredEnd~,
     )
-  } else if pattern.length() > 0 && pattern.has_suffix("$") {
+  } else if pattern.length() > 0 && pattern.get_char(pattern.length() - 1) == Some('$') {
     regex_match(
-      // Skip the last character ($)
-      pattern.substring(start=0, end=pattern.length() - 1),
+      try {
+        pattern[0:pattern.length() - 1].to_string()
+      } catch {
+        _ => ""
+      },
       text,
       anchoredStart~,
       anchoredEnd=true,
@@ -335,44 +357,33 @@ fn regex_match(
     // Define a helper that matches pattern at the beginning of 't',
     // requiring end of text if anchoredEnd
     fn inner_Match(p : String, t : String, end_anchor : Bool) -> Bool {
-      match (p.view(), t.view()) {
-        // If anchored end, text must be empty. Otherwise success.
-        (p, t) if p.length() == 0 => not(end_anchor) || t.length() == 0
-        // Handle ? quantifier: preceding char is optional (optional)
-        ([p0, '?', ..], [t0, ..]) =>
-          // Try skipping the char (0 occurrences)
-          if inner_Match(p.substring(start=2), t, end_anchor) {
-            true
-          } else {
-            // Try using it once
-            match (t.length() > 0 && p0 == t0) || p0 == '.' {
-              true =>
-                inner_Match(
-                  p.substring(start=2),
-                  t.substring(start=1),
-                  end_anchor,
-                )
-              false => false
-            }
+      match p.get_char(1) {
+        // Handle ? quantifier
+        Some('?') =>
+          match (p.get_char(0), t.get_char(0)) {
+            (Some(p0), Some(t0)) if matchChar(p0, t0) =>
+              inner_Match(safe_substring(p, 2), safe_substring(t, 1), end_anchor) ||
+              inner_Match(safe_substring(p, 2), t, end_anchor)
+            _ => inner_Match(safe_substring(p, 2), t, end_anchor)
           }
-        // Handle * quantifier (zero or more)
-        ([p0, '*', ..], [t0, ..]) =>
-          // Zero occurrences: if pattern is "a*bc", it becomes "bc" after skipping the first two characters
-          if inner_Match(p.substring(start=2), t, end_anchor) {
-            true
-          } else {
-            // One or more: check if we have at least one character that matches
-            // For example: if pattern is "b*c" and text is "bbbc",
-            // after one loop the text becomes "bbc" but the pattern stays the same
-            match (t.length() > 0 && p0 == t0) || p0 == '.' {
-              true => inner_Match(p, t.substring(start=1), end_anchor)
-              false => false
-            }
+        // Handle * quantifier
+        Some('*') =>
+          match (p.get_char(0), t.get_char(0)) {
+            (Some(p0), Some(t0)) if matchChar(p0, t0) =>
+              inner_Match(safe_substring(p, 2), t, end_anchor) ||
+              inner_Match(p, safe_substring(t, 1), end_anchor)
+            _ => inner_Match(safe_substring(p, 2), t, end_anchor)
           }
-        (_, t) if t.length() == 0 => false
-        ([p0, ..], [t0, ..]) if p0 == t0 || p0 == '.' =>
-          inner_Match(p.substring(start=1), t.substring(start=1), end_anchor)
-        (_, _) => false
+        _ =>
+          match (p.get_char(0), t.get_char(0)) {
+            // If pattern is empty, check end anchor
+            (None, None) => not(end_anchor) || true
+            (None, Some(_)) => not(end_anchor)
+            (Some(_), None) => false
+            (Some(p0), Some(t0)) if matchChar(p0, t0) =>
+              inner_Match(safe_substring(p, 1), safe_substring(t, 1), end_anchor)
+            (_, _) => false
+          }
       }
     }
     // If anchored start, only try at position 0
@@ -381,7 +392,7 @@ fn regex_match(
     }
     // Otherwise, try each starting position
     for i = 0; i <= text.length(); i = i + 1 {
-      if inner_Match(pattern, text.substring(start=i), anchoredEnd) {
+      if inner_Match(pattern, safe_substring(text, i), anchoredEnd) {
         return true
       }
     }
