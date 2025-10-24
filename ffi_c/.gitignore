@@ -1,0 +1,8 @@
+.DS_Store
+target/
+.mooncakes/
+.moonagent/
+
+# C
+*.a
+*.o
