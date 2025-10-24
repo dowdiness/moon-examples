@@ -1,10 +1,10 @@
 {
-  "name": "@antisatori/ffi_c",
-  "version": "0.1.0",
+  "name": "dowdiness/ffi_c",
+  "version": "0.1.1",
   "readme": "README.mbt.md",
-  "repository": "",
+  "repository": "https://github.com/dowdiness/moon-examples/tree/main/ffi_c",
   "license": "Apache-2.0",
-  "keywords": [],
+  "keywords": ["c", "ffi"],
   "description": "",
   "preferred-target": "native"
 }

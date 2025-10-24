@@ -3,7 +3,7 @@
   "supported-targets": ["native"],
   "import": [
     {
-      "path": "@antisatori/ffi_c/lib",
+      "path": "dowdiness/ffi_c/lib",
       "alias": "lib"
     }
   ],

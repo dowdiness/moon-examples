@@ -1,0 +1,57 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "dowdiness/ffi_c/lib"
+
+// Values
+fn cos(Double) -> Double
+
+fn cos_array(Int, FixedArray[Double], FixedArray[Double]) -> Int
+
+fn cosf(Float) -> Float
+
+fn init_n(Int) -> Array[Complex]
+
+fn is_normal(Double) -> Bool
+
+fn parse_int(String) -> Int
+
+fn print_complex(Complex) -> Int
+
+fn print_complex_iter(FixedArray[Complex]) -> Unit
+
+fn print_version() -> Unit
+
+fn sin(Double) -> Double
+
+fn sin_array(Int, FixedArray[Double], FixedArray[Double]) -> Int
+
+fn sinf(Float) -> Float
+
+fn tan(Double) -> Double
+
+fn tan_array(Int, FixedArray[Double], FixedArray[Double]) -> Int
+
+fn tan_c(Double) -> String
+
+fn tanf(Float) -> Float
+
+fn version() -> String
+
+fn version_major() -> Int
+
+// Errors
+
+// Types and methods
+type Complex
+fn Complex::default() -> Self // from trait `Default`
+fn Complex::length(Self) -> Double
+fn Complex::mul(Self, Self) -> Self
+fn Complex::new(Double, Double) -> Self
+fn Complex::output(Self, &Logger) -> Unit // from trait `Show`
+fn Complex::to_string(Self) -> String // from trait `Show`
+impl Default for Complex
+impl Show for Complex
+
+// Type aliases
+
+// Traits
+
