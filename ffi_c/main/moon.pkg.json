@@ -1,0 +1,15 @@
+{
+  "is-main": true,
+  "supported-targets": ["native"],
+  "import": [
+    {
+      "path": "@antisatori/ffi_c/lib",
+      "alias": "lib"
+    }
+  ],
+  "link": {
+    "native": {
+      "cc": "clang"
+    }
+  }
+}

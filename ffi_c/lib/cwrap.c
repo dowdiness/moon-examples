@@ -1,5 +1,5 @@
 // cwrap.c
-#include "cmd/main/mymath.h"
+#include "./mymath.h"
 #include <moonbit.h>
 
 #include <string.h> // for strlen

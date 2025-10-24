@@ -1,0 +1,4 @@
+{
+  "supported-targets": ["native"],
+  "native-stub": ["cwrap.c", "mymath.c"]
+}
