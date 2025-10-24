@@ -1,4 +1,4 @@
 ///|
 fn main {
-  println(@lib.fib(10))
+  println(@lib.search("ab*c", "abbbc"))
 }

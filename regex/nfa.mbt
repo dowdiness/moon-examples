@@ -19,6 +19,7 @@ priv enum ReToken {
   PLUS // '+' one or more
   CHARA(Char) // literal
 } derive (Eq, Show)
+
 fn re2tokens(input: String) -> @list.List[ReToken] {
   loop (input[:], @list.default()) {
     (['.', ..rest], acc) => continue (rest, acc.add(ANY))
