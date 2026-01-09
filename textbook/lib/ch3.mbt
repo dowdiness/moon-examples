@@ -153,14 +153,14 @@ test {
 // Lists
 // チュートリアルで使われているリストは無くなっているので、core/immut/listを使う必要があります。
 // https://mooncakes.io/docs/moonbitlang/core/immut/list
-let int_list: @list.List[Int] = @list.of([1, 2, 3])
+let int_list: @list.List[Int] = @list.from_array([1, 2, 3])
 // let string_list: @immut/list.T[String] = @immut/list.of(["This", "is", "a", "sentence."])
 
 // Construction
 test {
     let list0 : @list.List[Int] = @list.default() // 空リストを作る
     assert_eq(list0.length(), 0)
-    let list1 = @list.of([1, 2, 3, 4, 5]) // 配列からリストを作る
+    let list1 = @list.from_array([1, 2, 3, 4, 5]) // 配列からリストを作る
     assert_eq(list1.length(), 5)
     let list2 = list0.add(3).add(2).add(1) // リストの先頭に要素を追加
     assert_eq(list2.to_array(), [1, 2, 3])
@@ -171,7 +171,7 @@ test {
   let head: Option[Int] = int_list.head() // 最初の要素を取得します。全域関数でOption[T]を返します。
   let tail: @list.List[Int] = int_list.unsafe_tail() // 最初以外の要素を取得します。
   assert_eq(head, Some(1))
-  assert_eq(tail, @list.of([2, 3]))
+  assert_eq(tail, @list.from_array([2, 3]))
 }
 // Pattern Matching
 // match <expr> {
@@ -197,7 +197,7 @@ test {
     None => []
   }
   assert_eq(arr, [1])
-  let first_elem: Int? = head_opt(@list.of([1, 2]))
+  let first_elem: Int? = head_opt(@list.from_array([1, 2]))
   assert_eq(first_elem, Some(1))
   assert_eq(get_or_else(Some(1), 0), 1)
   assert_eq(get_or_else(None, 0), 0)
@@ -240,7 +240,7 @@ fn[T] length(list: @list.List[T]) -> Int {
 }
 
 test {
-  assert_eq(length(@list.of([1, 2])), 2)
+  assert_eq(length(@list.from_array([1, 2])), 2)
 }
 
 // Structural Recursion
@@ -250,7 +250,7 @@ fn[T] tail(list: @list.List[T]) -> @list.List[T] {
 }
 
 test {
-  assert_eq(tail(@list.of([1, 2])), @list.of([2]))
+  assert_eq(tail(@list.from_array([1, 2])), @list.from_array([2]))
 }
 
 // Dynamic Programming

@@ -49,7 +49,7 @@ priv struct NFA {
 test {
   let example: NFA = {
     start: 0,
-    transitions: @list.of([
+    transitions: @list.from_array([
       Transition(0, Branch(1, 3)),
       Transition(1, Character('a', 3)),
       Transition(2, Eps(0)),
@@ -66,8 +66,8 @@ test {
 // }
 
 test "re2token" {
-  assert_eq(re2tokens("a"), @list.of([CHARA('a')]))
-  assert_eq(re2tokens("a.c"), @list.of([CHARA('a'), ANY, CHARA('c')]))
-  assert_eq(re2tokens("ab+|c"), @list.of([CHARA('a'), CHARA('b'), PLUS, ALT, CHARA('c')]))
-  assert_eq(re2tokens("z*p?"), @list.of([CHARA('z'), STAR, CHARA('p'), QUESTION]))
+  assert_eq(re2tokens("a"), @list.from_array([CHARA('a')]))
+  assert_eq(re2tokens("a.c"), @list.from_array([CHARA('a'), ANY, CHARA('c')]))
+  assert_eq(re2tokens("ab+|c"), @list.from_array([CHARA('a'), CHARA('b'), PLUS, ALT, CHARA('c')]))
+  assert_eq(re2tokens("z*p?"), @list.from_array([CHARA('z'), STAR, CHARA('p'), QUESTION]))
 }

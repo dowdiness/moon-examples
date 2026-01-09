@@ -60,7 +60,7 @@ struct Queue[T] {
 //   }
 // }
 
-fn[T] push(self: Queue[T], t: T) -> Queue[T] {
+fn[T] Queue::push(self: Self[T], t: T) -> Self[T] {
   self.array[self.end] = t
   self.start = self.start
   self.end = (self.end + 1) % self.array.length() // 配列の持てる要素数を超えたら最初に戻る

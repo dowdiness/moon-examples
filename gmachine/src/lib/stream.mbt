@@ -12,14 +12,14 @@ pub fn[T] Stream::from_list(l: @list.List[T]) -> Stream[T] {
   }
 }
 
-pub fn[X, Y] map(self: Stream[X], f: (X) -> Y) -> Stream[Y] {
+pub fn[X, Y] Stream::map(self: Self[X], f: (X) -> Y) -> Self[Y] {
   match self {
     Nil => Nil
     Cons(head, tail) => Cons(f(head), fn () { tail().map(f) })
   }
 }
 
-pub fn[T] take(self: Stream[T], n: Int) -> @list.List[T] {
+pub fn[T] Stream::take(self: Self[T], n: Int) -> @list.List[T] {
   if n <= 0 {
     @list.new()
   } else {

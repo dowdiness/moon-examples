@@ -40,11 +40,11 @@ pub enum Expression {
 
 fn Expression::to_instructions(self : Expression) -> @list.List[Instruction] {
   match self {
-      Number(i) => @list.of([Const(I32(i))])
-      Plus(a, b) => a.to_instructions() + b.to_instructions() + @list.of([Add])
-      Minus(a, b) => a.to_instructions() + b.to_instructions() + @list.of([Sub])
-      Multiply(a, b) => a.to_instructions() + b.to_instructions() + @list.of([Mul])
-      Divide(a, b) => a.to_instructions() + b.to_instructions() + @list.of([Div])
+      Number(i) => @list.from_array([Const(I32(i))])
+      Plus(a, b) => a.to_instructions() + b.to_instructions() + @list.from_array([Add])
+      Minus(a, b) => a.to_instructions() + b.to_instructions() + @list.from_array([Sub])
+      Multiply(a, b) => a.to_instructions() + b.to_instructions() + @list.from_array([Mul])
+      Divide(a, b) => a.to_instructions() + b.to_instructions() + @list.from_array([Div])
   }
 }
 
@@ -54,7 +54,7 @@ test {
     Multiply(Number(2), Divide(Number(4), Number(2)))
   )
   let instructions: @list.List[Instruction] = expr.to_instructions()
-  assert_eq(instructions, @list.of([
+  assert_eq(instructions, @list.from_array([
     Const(I32(4)), Const(I32(1)), Sub,
     Const(I32(2)),
     Const(I32(4)), Const(I32(2)), Div, Mul,
@@ -65,7 +65,7 @@ test {
 test {
   // Basic Arithmetic Calculations
   // Stackを使った 1 + 2 の実装例
-  let _oneplustwo: @list.List[Instruction] = @list.of([
+  let _oneplustwo: @list.List[Instruction] = @list.from_array([
     Const(I32(1)),
     Const(I32(2)),
     Add
@@ -74,30 +74,30 @@ test {
 
   // Functions and Local Variables
   // add(a : Int, b : Int) { a + b }
-  let _local: @list.List[Instruction] = @list.of([ Local_Get("a"), Local_Get("b"), Add ])
+  let _local: @list.List[Instruction] = @list.from_array([ Local_Get("a"), Local_Get("b"), Add ])
   println(_local)
 
   // Conditional Statements
-  let _ifStatement: @list.List[Instruction] = @list.of([
+  let _ifStatement: @list.List[Instruction] = @list.from_array([
     Const(I32(1)), Const(I32(0)), Equal,
-    If(1, @list.of([Const(I32(1))]), @list.of([Const(I32(0))]))
+    If(1, @list.from_array([Const(I32(1))]), @list.from_array([Const(I32(0))]))
   ])
 
   let _program: Program = Program::{
 
     start: Some("test_add"), // Program entry point
 
-    functions: @list.of([
+    functions: @list.from_array([
       Function::{
         name: "add", // Addition function
-        params: @list.of(["a", "b"]), result: 1, locals: @list.of([]),
-        instructions: @list.of([Local_Get("a"), Local_Get("b"), Add]),
+        params: @list.from_array(["a", "b"]), result: 1, locals: @list.from_array([]),
+        instructions: @list.from_array([Local_Get("a"), Local_Get("b"), Add]),
       },
       Function::{
         name: "test_add", // calculate add and output
-        params: @list.of([]), result: 0, locals: @list.of([]), // no input or output
+        params: @list.from_array([]), result: 0, locals: @list.from_array([]), // no input or output
         // "print_int" is a special function
-        instructions: @list.of([Const(I32(0)), Const(I32(1)), Call("add"), Call("print_int")]),
+        instructions: @list.from_array([Const(I32(0)), Const(I32(1)), Call("add"), Call("print_int")]),
       },
     ]),
   }
@@ -188,11 +188,11 @@ test {
 
     start: Some("test_add"), // Program entry point
 
-    functions: @list.of([
+    functions: @list.from_array([
       Function::{
         name: "add", // Addition function
-        params: @list.of(["a", "b"]), result: 1, locals: @list.of([]),
-        instructions: @list.of([Local_Get("a"), Local_Get("b"), Add]),
+        params: @list.from_array(["a", "b"]), result: 1, locals: @list.from_array([]),
+        instructions: @list.from_array([Local_Get("a"), Local_Get("b"), Add]),
       },
     ]),
   }
@@ -251,26 +251,26 @@ test {
 
     start: Some("test_add"), // Program entry point
 
-    functions: @list.of([
+    functions: @list.from_array([
       Function::{
         name: "add", // Addition function
-        params: @list.of(["a", "b"]), result: 1, locals: @list.of([]),
-        instructions: @list.of([Local_Get("a"), Local_Get("b"), Add]),
+        params: @list.from_array(["a", "b"]), result: 1, locals: @list.from_array([]),
+        instructions: @list.from_array([Local_Get("a"), Local_Get("b"), Add]),
       },
       Function::{
         name: "test_add", // calculate add and output
-        params: @list.of([]), result: 0, locals: @list.of([]), // no input or output
+        params: @list.from_array([]), result: 0, locals: @list.from_array([]), // no input or output
         // "print_int" is a special function
-        instructions: @list.of([Const(I32(0)), Const(I32(1)), Call("add"), Call("print_int")]),
+        instructions: @list.from_array([Const(I32(0)), Const(I32(1)), Call("add"), Call("print_int")]),
       },
     ]),
   }
 
   let initial_state = State::{
     program: _program,
-    stack: @list.of([]),
+    stack: @list.from_array([]),
     locals: @hashmap.new(),
-    instructions: @list.of([AdministrativeInstruction::Plain(Call("test_add"))]),
+    instructions: @list.from_array([AdministrativeInstruction::Plain(Call("test_add"))]),
   }
   let state = initial_state
   let stdout = @buffer.new()
