@@ -112,8 +112,9 @@ pub impl Default for Complex with default() {
 extern "C" fn length(c_complex: C_Complex) -> Double = "length"
 
 pub fn Complex::length(self: Self) -> Double {
-  // self.inner() returns the internal C_Complex (i.e., the C pointer)
-  length(self.inner())
+  // deprecated!: self.inner() returns the internal C_Complex (i.e., the C pointer)
+  // use `.0` access the underlying type instead.
+  length(self.0)
 }
 
 // C: void multiply(Complex* a, Complex* b, Complex** result);
@@ -137,11 +138,11 @@ pub fn Complex::mul(self: Complex, other: Complex) -> Complex {
 extern "C" fn C_Complex::to_string(self: Self) -> String = "ccomplex_to_moonbit_str"
 
 pub impl Show for Complex with output(self: Complex, logger: &Logger) {
-  logger.write_string(self.inner().to_string())
+  logger.write_string(self.0.to_string())
 }
 
 pub impl Show for Complex with to_string(self) {
-  self.inner().to_string()
+  self.0.to_string()
 }
 
 pub fn init_n(n: Int) -> Array[Complex] {
