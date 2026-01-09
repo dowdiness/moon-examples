@@ -1,9 +1,8 @@
 ///|
 fn main {
   let simple =
-  #|  digraph {
-  #|    a -> b
-  #|  }
-
+    #|  digraph {
+    #|    a -> b
+    #|  }
   println(@lib.parse_dot(simple))
 }

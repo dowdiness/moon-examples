@@ -23,6 +23,7 @@
 // compass_pt : n | ne | e | se | s | sw | w | nw | c | _
 
 // Token types for the DOT language
+
 ///|
 pub(all) enum Token {
   // Keywords
@@ -57,6 +58,7 @@ pub(all) enum Token {
 } derive(Eq, Show)
 
 // AST node types
+
 ///|
 pub(all) enum CompassPoint {
   N
@@ -127,6 +129,7 @@ struct Graph {
 } derive(Eq, Show)
 
 // Lexer implementation
+
 ///|
 struct Lexer {
   input : String
@@ -356,6 +359,7 @@ fn Lexer::next_token(self : Lexer) -> Token {
 }
 
 // Parser implementation
+
 ///|
 pub(all) struct Parser {
   lexer : Lexer
@@ -668,6 +672,7 @@ fn Parser::parse_subgraph(self : Parser) -> Subgraph? {
 }
 
 // graph : [ strict ] (graph | digraph) [ ID ] '{' stmt_list '}'
+
 ///|
 fn Parser::parse_graph(self : Parser) -> Graph? {
   // Optional "strict" [ strict ]
@@ -717,6 +722,7 @@ fn Parser::parse_graph(self : Parser) -> Graph? {
 }
 
 // Public API
+
 ///|
 pub fn parse_dot(input : String) -> Graph? {
   let parser = Parser::new(input)
@@ -724,6 +730,7 @@ pub fn parse_dot(input : String) -> Graph? {
 }
 
 // Helper function to format the AST for debugging
+
 ///|
 pub fn format_graph(graph : Graph) -> String {
   let mut result = ""
