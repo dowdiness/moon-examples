@@ -1,7 +1,7 @@
 // A simple CEK machine implementation in Moon
 // https://youtu.be/O6s8_4agu4c?si=e5MJu6MU1vqvPHY5
 
-typealias @env.Env
+using @env {type Env}
 
 pub(all) suberror EvalError String
 

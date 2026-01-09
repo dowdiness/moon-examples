@@ -1,4 +1,4 @@
-typealias @env.Env
+using @env {type Env}
 
 ///|
 fn main {
