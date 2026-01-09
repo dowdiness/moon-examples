@@ -1,6 +1,7 @@
 {
   "is-main": true,
   "import": [
-    "antisatori/graphviz/lib"
+    "antisatori/graphviz/lib",
+    "antisatori/graphviz/lib/layout"
   ]
 }

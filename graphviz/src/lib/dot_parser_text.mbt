@@ -63,10 +63,6 @@ test "dot_parse" {
     #|}
   match parse_dot(dot_automaton) {
     Some(graph) => {
-      println("Parsed successfully:")
-      println("graph structure:")
-      println(graph)
-      println("format graph:")
       println(format_graph(graph))
     }
     None => println("Parse error")

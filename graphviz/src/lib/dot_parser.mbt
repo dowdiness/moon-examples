@@ -115,13 +115,13 @@ pub(all) enum Statement {
 } derive(Eq, Show)
 
 ///|
-struct Subgraph {
+pub(all) struct Subgraph {
   id : String?
   statements : Array[Statement]
 } derive(Eq, Show)
 
 ///|
-struct Graph {
+pub(all) struct Graph {
   strict : Bool
   directed : Bool
   id : String?
