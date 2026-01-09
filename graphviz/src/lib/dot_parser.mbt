@@ -142,11 +142,11 @@ fn Lexer::new(input : String) -> Lexer {
 }
 
 ///|
-fn advance(self : Lexer) -> Unit {
+fn Lexer::advance(self : Lexer) -> Unit {
   if self.position >= self.input.length() {
     self.current_char = None
   } else {
-    match Int::to_char(self.input.at(self.position)) {
+    match UInt16::to_char(self.input.at(self.position)) {
       Some(ch) => self.current_char = Some(ch)
       None => self.current_char = None
     }
@@ -155,7 +155,7 @@ fn advance(self : Lexer) -> Unit {
 }
 
 ///|
-fn skip_whitespace(self : Lexer) -> Unit {
+fn Lexer::skip_whitespace(self : Lexer) -> Unit {
   match self.current_char {
     Some(' ') | Some('\t') | Some('\n') | Some('\r') => {
       self.advance()
@@ -166,7 +166,7 @@ fn skip_whitespace(self : Lexer) -> Unit {
 }
 
 ///|
-fn skip_comment(self : Lexer) -> Unit {
+fn Lexer::skip_comment(self : Lexer) -> Unit {
   match self.current_char {
     Some('/') => {
       self.advance()
@@ -222,7 +222,7 @@ fn skip_comment(self : Lexer) -> Unit {
 }
 
 ///|
-fn read_identifier(self : Lexer) -> String {
+fn Lexer::read_identifier(self : Lexer) -> String {
   loop (self.current_char, "") {
     (Some(c), acc) if c.is_numeric() || c.is_ascii_alphabetic() || c == '_' => {
       self.advance()
@@ -233,7 +233,7 @@ fn read_identifier(self : Lexer) -> String {
 }
 
 ///|
-fn read_quoted_string(self : Lexer) -> String {
+fn Lexer::read_quoted_string(self : Lexer) -> String {
   let quote_char = self.current_char.unwrap()
   self.advance() // Skip opening quote
   let result = loop (self.current_char, "") {
@@ -279,7 +279,7 @@ fn keyword_or_id(word : String) -> Token {
 }
 
 ///|
-fn next_token(self : Lexer) -> Token {
+fn Lexer::next_token(self : Lexer) -> Token {
   while true {
     self.skip_whitespace()
     match self.current_char {
@@ -370,7 +370,7 @@ fn Parser::new(input : String) -> Parser {
 }
 
 ///|
-fn eat(self : Parser, expected : Token) -> Bool {
+fn Parser::eat(self : Parser, expected : Token) -> Bool {
   match (self.current_token, expected) {
     (ID(_), ID(_)) | (CompassPt(_), CompassPt(_)) => {
       self.current_token = self.lexer.next_token()
@@ -402,7 +402,7 @@ fn parse_compass_point(compass_str : String) -> CompassPoint {
 }
 
 ///|
-fn parse_port(self : Parser) -> Port? {
+fn Parser::parse_port(self : Parser) -> Port? {
   if not(self.eat(Colon)) {
     return None
   }
@@ -431,7 +431,7 @@ fn parse_port(self : Parser) -> Port? {
 }
 
 ///|
-fn parse_node_id(self : Parser) -> NodeId? {
+fn Parser::parse_node_id(self : Parser) -> NodeId? {
   match self.current_token {
     ID(id) => {
       ignore(self.eat(ID("")))
@@ -443,7 +443,7 @@ fn parse_node_id(self : Parser) -> NodeId? {
 }
 
 ///|
-fn parse_attribute(self : Parser) -> Attribute? {
+fn Parser::parse_attribute(self : Parser) -> Attribute? {
   match self.current_token {
     ID(key) => {
       ignore(self.eat(ID("")))
@@ -464,7 +464,7 @@ fn parse_attribute(self : Parser) -> Attribute? {
 }
 
 ///|
-fn parse_a_list(self : Parser) -> Array[Attribute] {
+fn Parser::parse_a_list(self : Parser) -> Array[Attribute] {
   let attributes = []
   while true {
     match self.parse_attribute() {
@@ -482,7 +482,7 @@ fn parse_a_list(self : Parser) -> Array[Attribute] {
 }
 
 ///|
-fn parse_attr_list(self : Parser) -> AttributeList? {
+fn Parser::parse_attr_list(self : Parser) -> AttributeList? {
   if not(self.eat(LeftBracket)) {
     return None
   }
@@ -502,7 +502,7 @@ fn parse_attr_list(self : Parser) -> AttributeList? {
 }
 
 ///|
-fn parse_edge_rhs(self : Parser) -> Array[(EdgeOp, NodeId)]? {
+fn Parser::parse_edge_rhs(self : Parser) -> Array[(EdgeOp, NodeId)]? {
   let edges = []
   while true {
     let edge_op = match self.current_token {
@@ -529,7 +529,7 @@ fn parse_edge_rhs(self : Parser) -> Array[(EdgeOp, NodeId)]? {
 }
 
 ///|
-fn parse_statement(self : Parser) -> Statement? {
+fn Parser::parse_statement(self : Parser) -> Statement? {
   match self.current_token {
     // Attribute statement
     Graph | Node | Edge => {
@@ -619,7 +619,7 @@ fn parse_statement(self : Parser) -> Statement? {
 }
 
 ///|
-fn parse_stmt_list(self : Parser) -> Array[Statement] {
+fn Parser::parse_stmt_list(self : Parser) -> Array[Statement] {
   let statements = []
   while true {
     match self.parse_statement() {
@@ -641,7 +641,7 @@ fn parse_stmt_list(self : Parser) -> Array[Statement] {
 }
 
 ///|
-fn parse_subgraph(self : Parser) -> Subgraph? {
+fn Parser::parse_subgraph(self : Parser) -> Subgraph? {
   // Optional "subgraph" keyword
   let id = loop (self.current_token, None) {
     (Subgraph, id) => {
@@ -669,7 +669,7 @@ fn parse_subgraph(self : Parser) -> Subgraph? {
 
 // graph : [ strict ] (graph | digraph) [ ID ] '{' stmt_list '}'
 ///|
-fn parse_graph(self : Parser) -> Graph? {
+fn Parser::parse_graph(self : Parser) -> Graph? {
   // Optional "strict" [ strict ]
   let strict = match self.current_token {
     Strict => {
