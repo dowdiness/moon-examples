@@ -3,7 +3,7 @@ summary: "Complete design for Sugiyama hierarchical layout engine for DOT graphs
 created: 2026-01-09
 status: in-progress
 tags: [layout, sugiyama, graph-visualization, architecture, moonbit]
-related: [src/lib/dot_parser.mbt, CLAUDE.md]
+related: [src/lib/parser/dot_parser.mbt, CLAUDE.md]
 ---
 
 # Sugiyama Layout Engine Design for DOT Language
@@ -46,7 +46,7 @@ src/lib/layout/
 ```json
 {
   "is_main": false,
-  "import": ["antisatori/graphviz/lib"]
+  "import": ["antisatori/graphviz/lib/parser"]
 }
 ```
 
@@ -353,7 +353,7 @@ fn main {
 
   match parse_dot(dot) {
     Some(graph) => {
-      let layout = @lib.layout.compute_layout(graph)
+      let layout = @layout.compute_layout(graph)
       println("Nodes: \{layout.nodes.size()}")
       println("Edges: \{layout.edges.length()}")
       println("Bounds: \{layout.bounds}")
@@ -379,7 +379,7 @@ Based on codebase analysis:
 
 ## Critical Files
 
-- **`src/lib/dot_parser.mbt`** (existing) - Reference for AST types
+- **`src/lib/parser/dot_parser.mbt`** (existing) - Reference for AST types
 - **`src/lib/layout/types.mbt`** (new) - Layout output structures
 - **`src/lib/layout/graph_builder.mbt`** (new) - AST conversion
 - **`src/lib/layout/layer_assignment.mbt`** (new) - Core ranking algorithm
