@@ -1,19 +1,19 @@
 // Convert DOT AST to internal graph representation
 
 ///|
-pub fn extract_graph(graph : @lib.Graph) -> InternalGraph {
+pub fn extract_graph(graph : @parser.Graph) -> InternalGraph {
   let nodes = collect_nodes(graph.statements)
   let edges = collect_edges(graph.statements, graph.directed)
   { nodes, edges, directed: graph.directed }
 }
 
 ///|
-fn collect_nodes(statements : Array[@lib.Statement]) -> Map[String, NodeInfo] {
+fn collect_nodes(statements : Array[@parser.Statement]) -> Map[String, NodeInfo] {
   let nodes : Map[String, NodeInfo] = Map::new()
 
   for stmt in statements {
     match stmt {
-      @lib.NodeStmt(node_id, _attrs) => {
+      @parser.NodeStmt(node_id, _attrs) => {
         if not(nodes.contains(node_id.id)) {
           nodes.set(
             node_id.id,
@@ -21,7 +21,7 @@ fn collect_nodes(statements : Array[@lib.Statement]) -> Map[String, NodeInfo] {
           )
         }
       }
-      @lib.EdgeStmt(start_node, edges, _attrs) => {
+      @parser.EdgeStmt(start_node, edges, _attrs) => {
         // Add start node
         if not(nodes.contains(start_node.id)) {
           nodes.set(
@@ -40,7 +40,7 @@ fn collect_nodes(statements : Array[@lib.Statement]) -> Map[String, NodeInfo] {
           }
         }
       }
-      @lib.Subgraph(subgraph) => {
+      @parser.Subgraph(subgraph) => {
         // Recursively collect nodes from subgraph
         let subgraph_nodes = collect_nodes(subgraph.statements)
         subgraph_nodes.each(fn(id, node_info) {
@@ -49,8 +49,8 @@ fn collect_nodes(statements : Array[@lib.Statement]) -> Map[String, NodeInfo] {
           }
         })
       }
-      @lib.AttrStmt(_attr_type, _attr_list) => ()
-      @lib.Assignment(_key, _value) => ()
+      @parser.AttrStmt(_attr_type, _attr_list) => ()
+      @parser.Assignment(_key, _value) => ()
     }
   }
   nodes
@@ -58,14 +58,14 @@ fn collect_nodes(statements : Array[@lib.Statement]) -> Map[String, NodeInfo] {
 
 ///|
 fn collect_edges(
-  statements : Array[@lib.Statement],
+  statements : Array[@parser.Statement],
   directed : Bool
 ) -> Array[Edge] {
   let edges : Array[Edge] = []
 
   for stmt in statements {
     match stmt {
-      @lib.EdgeStmt(start_node, edge_list, _attrs) => {
+      @parser.EdgeStmt(start_node, edge_list, _attrs) => {
         // Handle edge chains: a -> b -> c becomes [(a,b), (b,c)]
         let mut current = start_node.id
         for edge_pair in edge_list {
@@ -74,7 +74,7 @@ fn collect_edges(
           edges.push({ from: current, to: target_node.id, original_direction: Forward })
 
           // For undirected graphs, create reverse edge too
-          if not(directed) || edge_op == @lib.Undirected {
+          if not(directed) || edge_op == @parser.Undirected {
             edges.push({ from: target_node.id, to: current, original_direction: Forward })
           }
 
@@ -82,16 +82,16 @@ fn collect_edges(
           current = target_node.id
         }
       }
-      @lib.Subgraph(subgraph) => {
+      @parser.Subgraph(subgraph) => {
         // Recursively collect edges from subgraph
         let subgraph_edges = collect_edges(subgraph.statements, directed)
         for edge in subgraph_edges {
           edges.push(edge)
         }
       }
-      @lib.NodeStmt(_node_id, _attrs) => ()
-      @lib.AttrStmt(_attr_type, _attr_list) => ()
-      @lib.Assignment(_key, _value) => ()
+      @parser.NodeStmt(_node_id, _attrs) => ()
+      @parser.AttrStmt(_attr_type, _attr_list) => ()
+      @parser.Assignment(_key, _value) => ()
     }
   }
   edges

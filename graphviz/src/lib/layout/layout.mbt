@@ -1,13 +1,13 @@
 // Main Layout Orchestrator - Public API
 
 ///|
-pub fn compute_layout(graph : @lib.Graph) -> GraphLayout {
+pub fn compute_layout(graph : @parser.Graph) -> GraphLayout {
   compute_layout_with_config(graph, LayoutConfig::default())
 }
 
 ///|
 pub fn compute_layout_with_config(
-  graph : @lib.Graph,
+  graph : @parser.Graph,
   config : LayoutConfig
 ) -> GraphLayout {
   // 1. Extract internal graph from AST

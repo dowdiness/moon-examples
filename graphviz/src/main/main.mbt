@@ -2,9 +2,9 @@
 fn test_layout(name : String, dot : String) -> Unit {
   println("=== \{name} ===\n")
 
-  match @lib.parse_dot(dot) {
+  match @parser.parse_dot(dot) {
     Some(graph) => {
-      let layout = @antisatori/graphviz/lib/layout.compute_layout(graph)
+      let layout = @layout.compute_layout(graph)
 
       println("Layout Results:")
       println("  Nodes: \{layout.nodes.length()}")

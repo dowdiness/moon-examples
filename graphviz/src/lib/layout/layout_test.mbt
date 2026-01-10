@@ -3,7 +3,7 @@
 ///|
 test "graph_extraction_simple" {
   let dot = "digraph { a -> b }"
-  match @lib.parse_dot(dot) {
+  match @parser.parse_dot(dot) {
     Some(graph) => {
       let internal = extract_graph(graph)
       inspect(internal.nodes.length(), content="2")
@@ -24,7 +24,7 @@ test "full_layout_simple_chain" {
     #|  a -> b
     #|  b -> c
     #|}
-  match @lib.parse_dot(dot) {
+  match @parser.parse_dot(dot) {
     Some(graph) => {
       let layout = compute_layout(graph)
 
@@ -51,7 +51,7 @@ test "full_layout_diamond" {
     #|  b -> d;
     #|  c -> d;
     #|}
-  match @lib.parse_dot(dot) {
+  match @parser.parse_dot(dot) {
     Some(graph) => {
       let layout = compute_layout(graph)
 
@@ -75,7 +75,7 @@ test "full_layout_automaton" {
     #|  4 -> 4
     #|}
 
-  match @lib.parse_dot(dot_automaton) {
+  match @parser.parse_dot(dot_automaton) {
     Some(graph) => {
       let layout = compute_layout(graph)
 

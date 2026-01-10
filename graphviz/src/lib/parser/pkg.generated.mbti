@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "antisatori/graphviz/lib"
+package "antisatori/graphviz/lib/parser"
 
 // Values
 pub fn format_graph(Graph) -> String
@@ -44,7 +44,12 @@ pub(all) enum EdgeOp {
 pub impl Eq for EdgeOp
 pub impl Show for EdgeOp
 
-type Graph
+pub(all) struct Graph {
+  strict : Bool
+  directed : Bool
+  id : String?
+  statements : Array[Statement]
+}
 pub impl Eq for Graph
 pub impl Show for Graph
 
@@ -79,7 +84,10 @@ pub(all) enum Statement {
 pub impl Eq for Statement
 pub impl Show for Statement
 
-type Subgraph
+pub(all) struct Subgraph {
+  id : String?
+  statements : Array[Statement]
+}
 pub impl Eq for Subgraph
 pub impl Show for Subgraph
 

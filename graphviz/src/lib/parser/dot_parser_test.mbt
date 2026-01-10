@@ -279,16 +279,16 @@ test "parse_edge_with_ports" {
 
 test "parse_all_compass_points" {
   let compass_tests = [
-    ("n", @lib.N),
-    ("ne", @lib.NE),
-    ("e", @lib.E),
-    ("se", @lib.SE),
-    ("s", @lib.S),
-    ("sw", @lib.SW),
-    ("w", @lib.W),
-    ("nw", @lib.NW),
-    ("c", @lib.C),
-    ("_", @lib.Underscore),
+    ("n", @parser.N),
+    ("ne", @parser.NE),
+    ("e", @parser.E),
+    ("se", @parser.SE),
+    ("s", @parser.S),
+    ("sw", @parser.SW),
+    ("w", @parser.W),
+    ("nw", @parser.NW),
+    ("c", @parser.C),
+    ("_", @parser.Underscore),
   ]
   for point in compass_tests {
     let (name, expected) = point
