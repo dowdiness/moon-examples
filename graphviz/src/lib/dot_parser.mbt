@@ -275,8 +275,6 @@ fn keyword_or_id(word : String) -> Token {
     "node" => Node
     "edge" => Edge
     "subgraph" => Subgraph
-    "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw" | "c" | "_" =>
-      CompassPt(word)
     _ => ID(word)
   }
 }
@@ -376,7 +374,7 @@ fn Parser::new(input : String) -> Parser {
 ///|
 fn Parser::eat(self : Parser, expected : Token) -> Bool {
   match (self.current_token, expected) {
-    (ID(_), ID(_)) | (CompassPt(_), CompassPt(_)) => {
+    (ID(_), ID(_)) => {
       self.current_token = self.lexer.next_token()
       true
     }
@@ -384,6 +382,14 @@ fn Parser::eat(self : Parser, expected : Token) -> Bool {
       self.current_token = self.lexer.next_token()
       true
     }
+    _ => false
+  }
+}
+
+///|
+fn is_compass_point(s : String) -> Bool {
+  match s {
+    "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw" | "c" | "_" => true
     _ => false
   }
 }
@@ -413,21 +419,23 @@ fn Parser::parse_port(self : Parser) -> Port? {
   let port = { id: None, compass: None }
   match self.current_token {
     ID(id) => {
-      port.id = Some(id)
-      ignore(self.eat(ID("")))
-      if self.eat(Colon) {
-        match self.current_token {
-          CompassPt(compass_str) => {
-            port.compass = Some(parse_compass_point(compass_str))
-            ignore(self.eat(CompassPt("")))
+      // Check if this ID is a compass point
+      if is_compass_point(id) {
+        port.compass = Some(parse_compass_point(id))
+        ignore(self.eat(ID("")))
+      } else {
+        port.id = Some(id)
+        ignore(self.eat(ID("")))
+        if self.eat(Colon) {
+          match self.current_token {
+            ID(compass_str) if is_compass_point(compass_str) => {
+              port.compass = Some(parse_compass_point(compass_str))
+              ignore(self.eat(ID("")))
+            }
+            _ => ()
           }
-          _ => ()
         }
       }
-    }
-    CompassPt(compass_str) => {
-      port.compass = Some(parse_compass_point(compass_str))
-      ignore(self.eat(CompassPt("")))
     }
     _ => ()
   }
