@@ -2,6 +2,7 @@
 
 // Basic graph parsing tests
 
+///|
 test "parse_simple_undirected_graph" {
   let input = "graph { }"
   match parse_dot(input) {
@@ -15,6 +16,7 @@ test "parse_simple_undirected_graph" {
   }
 }
 
+///|
 test "parse_simple_directed_graph" {
   let input = "digraph { }"
   match parse_dot(input) {
@@ -28,6 +30,7 @@ test "parse_simple_directed_graph" {
   }
 }
 
+///|
 test "parse_graph_with_id" {
   let input = "graph MyGraph { }"
   match parse_dot(input) {
@@ -40,6 +43,7 @@ test "parse_graph_with_id" {
   }
 }
 
+///|
 test "parse_strict_graph" {
   let input = "strict graph { }"
   match parse_dot(input) {
@@ -51,6 +55,7 @@ test "parse_strict_graph" {
   }
 }
 
+///|
 test "parse_strict_digraph_with_id" {
   let input = "strict digraph G { }"
   match parse_dot(input) {
@@ -65,6 +70,7 @@ test "parse_strict_digraph_with_id" {
 
 // Node statement tests
 
+///|
 test "parse_simple_node" {
   let input = "graph { a }"
   match parse_dot(input) {
@@ -83,6 +89,7 @@ test "parse_simple_node" {
   }
 }
 
+///|
 test "parse_node_with_attributes" {
   let input = "graph { a [color=red] }"
   match parse_dot(input) {
@@ -107,20 +114,18 @@ test "parse_node_with_attributes" {
   }
 }
 
+///|
 test "parse_node_with_multiple_attributes" {
   let input = "graph { a [color=red, shape=box, style=filled] }"
   match parse_dot(input) {
     Some(graph) => {
       assert_eq(graph.statements.length(), 1)
       match graph.statements[0] {
-        NodeStmt(_, attr_list) => {
+        NodeStmt(_, attr_list) =>
           match attr_list {
-            Some(attrs) => {
-              assert_eq(attrs.attributes.length(), 3)
-            }
+            Some(attrs) => assert_eq(attrs.attributes.length(), 3)
             None => abort("Expected attribute list")
           }
-        }
         _ => abort("Expected NodeStmt")
       }
     }
@@ -130,6 +135,7 @@ test "parse_node_with_multiple_attributes" {
 
 // Edge statement tests
 
+///|
 test "parse_simple_undirected_edge" {
   let input = "graph { a -- b }"
   match parse_dot(input) {
@@ -148,6 +154,7 @@ test "parse_simple_undirected_edge" {
   }
 }
 
+///|
 test "parse_simple_directed_edge" {
   let input = "digraph { a -> b }"
   match parse_dot(input) {
@@ -165,26 +172,24 @@ test "parse_simple_directed_edge" {
   }
 }
 
+///|
 test "parse_edge_with_attributes" {
   let input = "digraph { a -> b [color=blue, weight=2] }"
   match parse_dot(input) {
-    Some(graph) => {
+    Some(graph) =>
       match graph.statements[0] {
-        EdgeStmt(_, _, attr_list) => {
+        EdgeStmt(_, _, attr_list) =>
           match attr_list {
-            Some(attrs) => {
-              assert_eq(attrs.attributes.length(), 2)
-            }
+            Some(attrs) => assert_eq(attrs.attributes.length(), 2)
             None => abort("Expected attribute list")
           }
-        }
         _ => abort("Expected EdgeStmt")
       }
-    }
     None => abort("Failed to parse edge with attributes")
   }
 }
 
+///|
 test "parse_edge_chain" {
   let input = "digraph { a -> b; b -> c }"
   match parse_dot(input) {
@@ -204,6 +209,7 @@ test "parse_edge_chain" {
 
 // Port specification tests
 
+///|
 test "parse_node_with_port" {
   let input = "digraph { a:port1 }"
   match parse_dot(input) {
@@ -227,26 +233,24 @@ test "parse_node_with_port" {
   }
 }
 
+///|
 test "parse_node_with_port_and_compass" {
   let input = "digraph { a:port:ne }"
   match parse_dot(input) {
     Some(graph) => {
       assert_eq(graph.statements.length(), 1)
       match graph.statements[0] {
-        NodeStmt(node_id, _) => {
+        NodeStmt(node_id, _) =>
           match node_id.port {
             Some(port) => {
               assert_eq(port.id, Some("port"))
               match port.compass {
-                Some(compass) => {
-                  assert_eq(compass, NE)
-                }
+                Some(compass) => assert_eq(compass, NE)
                 None => abort("Expected compass point")
               }
             }
             None => abort("Expected port")
           }
-        }
         _ => abort("Expected NodeStmt")
       }
     }
@@ -254,29 +258,28 @@ test "parse_node_with_port_and_compass" {
   }
 }
 
+///|
 test "parse_edge_with_ports" {
   let input = "digraph { a:out -> b:in }"
   match parse_dot(input) {
-    Some(graph) => {
+    Some(graph) =>
       match graph.statements[0] {
         EdgeStmt(start, _edges, _) => {
           assert_eq(start.id, "a")
           match start.port {
-            Some(port) => {
-              assert_eq(port.id, Some("out"))
-            }
+            Some(port) => assert_eq(port.id, Some("out"))
             None => abort("Expected port on start node")
           }
         }
         _ => abort("Expected EdgeStmt")
       }
-    }
     None => abort("Failed to parse edge with ports")
   }
 }
 
 // Compass point tests
 
+///|
 test "parse_all_compass_points" {
   let compass_tests = [
     ("n", @parser.N),
@@ -294,19 +297,15 @@ test "parse_all_compass_points" {
     let (name, expected) = point
     let input = "digraph { a:p:" + name + " }"
     match parse_dot(input) {
-      Some(graph) => {
+      Some(graph) =>
         match graph.statements[0] {
-          NodeStmt(node_id, _) => {
+          NodeStmt(node_id, _) =>
             match node_id.port {
-              Some(port) => {
-                assert_eq(port.compass, Some(expected))
-              }
+              Some(port) => assert_eq(port.compass, Some(expected))
               None => abort("Expected port")
             }
-          }
           _ => abort("Expected NodeStmt")
         }
-      }
       None => abort("Failed to parse compass point " + name)
     }
   }
@@ -314,6 +313,7 @@ test "parse_all_compass_points" {
 
 // Attribute statement tests
 
+///|
 test "parse_graph_attribute" {
   let input = "digraph { graph [rankdir=LR] }"
   match parse_dot(input) {
@@ -331,10 +331,11 @@ test "parse_graph_attribute" {
   }
 }
 
+///|
 test "parse_node_attribute" {
   let input = "digraph { node [shape=box, style=filled] }"
   match parse_dot(input) {
-    Some(graph) => {
+    Some(graph) =>
       match graph.statements[0] {
         AttrStmt(attr_type, attr_list) => {
           assert_eq(attr_type, "node")
@@ -342,15 +343,15 @@ test "parse_node_attribute" {
         }
         _ => abort("Expected AttrStmt")
       }
-    }
     None => abort("Failed to parse node attribute")
   }
 }
 
+///|
 test "parse_edge_attribute" {
   let input = "digraph { edge [color=red, penwidth=2] }"
   match parse_dot(input) {
-    Some(graph) => {
+    Some(graph) =>
       match graph.statements[0] {
         AttrStmt(attr_type, attr_list) => {
           assert_eq(attr_type, "edge")
@@ -358,13 +359,13 @@ test "parse_edge_attribute" {
         }
         _ => abort("Expected AttrStmt")
       }
-    }
     None => abort("Failed to parse edge attribute")
   }
 }
 
 // Assignment statement tests
 
+///|
 test "parse_assignment" {
   let input = "digraph { rankdir = LR }"
   match parse_dot(input) {
@@ -384,6 +385,7 @@ test "parse_assignment" {
 
 // Subgraph tests
 
+///|
 test "parse_subgraph" {
   let input = "digraph { subgraph { a } }"
   match parse_dot(input) {
@@ -401,10 +403,11 @@ test "parse_subgraph" {
   }
 }
 
+///|
 test "parse_named_subgraph" {
   let input = "digraph { subgraph cluster_0 { a } }"
   match parse_dot(input) {
-    Some(graph) => {
+    Some(graph) =>
       match graph.statements[0] {
         Subgraph(subgraph) => {
           assert_eq(subgraph.id, Some("cluster_0"))
@@ -412,11 +415,11 @@ test "parse_named_subgraph" {
         }
         _ => abort("Expected Subgraph")
       }
-    }
     None => abort("Failed to parse named subgraph")
   }
 }
 
+///|
 test "parse_nested_subgraphs" {
   let input = "digraph { subgraph { subgraph { a } } }"
   match parse_dot(input) {
@@ -426,9 +429,7 @@ test "parse_nested_subgraphs" {
         Subgraph(outer) => {
           assert_eq(outer.statements.length(), 1)
           match outer.statements[0] {
-            Subgraph(inner) => {
-              assert_eq(inner.statements.length(), 1)
-            }
+            Subgraph(inner) => assert_eq(inner.statements.length(), 1)
             _ => abort("Expected nested subgraph")
           }
         }
@@ -441,6 +442,7 @@ test "parse_nested_subgraphs" {
 
 // Complex graph tests
 
+///|
 test "parse_complex_digraph" {
   let input =
     #|digraph G {
@@ -461,26 +463,25 @@ test "parse_complex_digraph" {
   }
 }
 
+///|
 test "parse_graph_with_multiple_edges" {
   let input = "graph { a -- b; b -- c; c -- d }"
   match parse_dot(input) {
-    Some(graph) => {
-      assert_eq(graph.statements.length(), 3)
-    }
+    Some(graph) => assert_eq(graph.statements.length(), 3)
     None => abort("Failed to parse multiple edges")
   }
 }
 
+///|
 test "parse_optional_semicolons" {
   let input = "digraph { a b c }"
   match parse_dot(input) {
-    Some(graph) => {
-      assert_eq(graph.statements.length(), 3)
-    }
+    Some(graph) => assert_eq(graph.statements.length(), 3)
     None => abort("Failed to parse optional semicolons")
   }
 }
 
+///|
 test "parse_mixed_statements" {
   let input =
     #|digraph {
@@ -489,15 +490,14 @@ test "parse_mixed_statements" {
     #|  b [color=red]
     #|}
   match parse_dot(input) {
-    Some(graph) => {
-      assert_eq(graph.statements.length(), 3)
-    }
+    Some(graph) => assert_eq(graph.statements.length(), 3)
     None => abort("Failed to parse mixed statements")
   }
 }
 
 // Real-world examples
 
+///|
 test "parse_automaton_graph" {
   let dot_automaton =
     #|digraph {
@@ -519,6 +519,7 @@ test "parse_automaton_graph" {
   }
 }
 
+///|
 test "parse_state_machine" {
   let input =
     #|digraph finite_state_machine {
@@ -539,38 +540,35 @@ test "parse_state_machine" {
   }
 }
 
+///|
 test "parse_record_shaped_node" {
   let input = "digraph { a [shape=record, label=\"field1|field2\"] }"
   match parse_dot(input) {
-    Some(graph) => {
+    Some(graph) =>
       match graph.statements[0] {
-        NodeStmt(_, attr_list) => {
+        NodeStmt(_, attr_list) =>
           match attr_list {
-            Some(attrs) => {
-              assert_eq(attrs.attributes.length(), 2)
-            }
+            Some(attrs) => assert_eq(attrs.attributes.length(), 2)
             None => abort("Expected attributes")
           }
-        }
         _ => abort("Expected NodeStmt")
       }
-    }
     None => abort("Failed to parse record shaped node")
   }
 }
 
 // Whitespace and comment tests
 
+///|
 test "parse_with_extra_whitespace" {
   let input = "digraph   {   a  ->  b   }"
   match parse_dot(input) {
-    Some(graph) => {
-      assert_eq(graph.statements.length(), 1)
-    }
+    Some(graph) => assert_eq(graph.statements.length(), 1)
     None => abort("Failed to parse with extra whitespace")
   }
 }
 
+///|
 test "parse_with_newlines" {
   let input =
     #|digraph {
@@ -578,13 +576,12 @@ test "parse_with_newlines" {
     #|    b
     #|}
   match parse_dot(input) {
-    Some(graph) => {
-      assert_eq(graph.statements.length(), 1)
-    }
+    Some(graph) => assert_eq(graph.statements.length(), 1)
     None => abort("Failed to parse with newlines")
   }
 }
 
+///|
 test "parse_with_line_comments" {
   let input =
     #|digraph {
@@ -592,13 +589,12 @@ test "parse_with_line_comments" {
     #|  a -> b
     #|}
   match parse_dot(input) {
-    Some(graph) => {
-      assert_eq(graph.statements.length(), 1)
-    }
+    Some(graph) => assert_eq(graph.statements.length(), 1)
     None => abort("Failed to parse with line comments")
   }
 }
 
+///|
 test "parse_with_block_comments" {
   let input =
     #|digraph {
@@ -607,13 +603,12 @@ test "parse_with_block_comments" {
     #|  a -> b
     #|}
   match parse_dot(input) {
-    Some(graph) => {
-      assert_eq(graph.statements.length(), 1)
-    }
+    Some(graph) => assert_eq(graph.statements.length(), 1)
     None => abort("Failed to parse with block comments")
   }
 }
 
+///|
 test "parse_with_hash_comments" {
   let input =
     #|digraph {
@@ -621,47 +616,43 @@ test "parse_with_hash_comments" {
     #|  a -> b
     #|}
   match parse_dot(input) {
-    Some(graph) => {
-      assert_eq(graph.statements.length(), 1)
-    }
+    Some(graph) => assert_eq(graph.statements.length(), 1)
     None => abort("Failed to parse with hash comments")
   }
 }
 
 // Identifier variations
 
+///|
 test "parse_numeric_identifiers" {
   let input = "digraph { 0; 1; 123 }"
   match parse_dot(input) {
-    Some(graph) => {
-      assert_eq(graph.statements.length(), 3)
-    }
+    Some(graph) => assert_eq(graph.statements.length(), 3)
     None => abort("Failed to parse numeric identifiers")
   }
 }
 
+///|
 test "parse_quoted_identifiers" {
   let input = "digraph { \"hello world\" -> \"goodbye world\" }"
   match parse_dot(input) {
-    Some(graph) => {
-      assert_eq(graph.statements.length(), 1)
-    }
+    Some(graph) => assert_eq(graph.statements.length(), 1)
     None => abort("Failed to parse quoted identifiers")
   }
 }
 
+///|
 test "parse_identifiers_with_underscores" {
   let input = "digraph { node_1 -> node_2 }"
   match parse_dot(input) {
-    Some(graph) => {
-      assert_eq(graph.statements.length(), 1)
-    }
+    Some(graph) => assert_eq(graph.statements.length(), 1)
     None => abort("Failed to parse identifiers with underscores")
   }
 }
 
 // Error cases (should return None)
 
+///|
 test "parse_missing_braces" {
   let input = "digraph"
   match parse_dot(input) {
@@ -670,6 +661,7 @@ test "parse_missing_braces" {
   }
 }
 
+///|
 test "parse_missing_closing_brace" {
   let input = "digraph { a ->"
   match parse_dot(input) {
@@ -678,6 +670,7 @@ test "parse_missing_closing_brace" {
   }
 }
 
+///|
 test "parse_invalid_graph_type" {
   let input = "invalid { a }"
   match parse_dot(input) {
@@ -686,6 +679,7 @@ test "parse_invalid_graph_type" {
   }
 }
 
+///|
 test "parse_empty_input" {
   let input = ""
   match parse_dot(input) {
@@ -696,6 +690,7 @@ test "parse_empty_input" {
 
 // Formatting tests
 
+///|
 test "format_simple_graph" {
   let input = "graph { a }"
   match parse_dot(input) {
@@ -708,6 +703,7 @@ test "format_simple_graph" {
   }
 }
 
+///|
 test "format_digraph" {
   let input = "digraph { a -> b }"
   match parse_dot(input) {
@@ -719,6 +715,7 @@ test "format_digraph" {
   }
 }
 
+///|
 test "format_strict_graph" {
   let input = "strict graph { a }"
   match parse_dot(input) {

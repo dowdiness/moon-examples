@@ -418,7 +418,7 @@ fn Parser::parse_port(self : Parser) -> Port? {
   }
   let port = { id: None, compass: None }
   match self.current_token {
-    ID(id) => {
+    ID(id) =>
       // Check if this ID is a compass point
       if is_compass_point(id) {
         port.compass = Some(parse_compass_point(id))
@@ -436,7 +436,6 @@ fn Parser::parse_port(self : Parser) -> Port? {
           }
         }
       }
-    }
     _ => ()
   }
   Some(port)
