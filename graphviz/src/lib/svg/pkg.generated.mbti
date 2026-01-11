@@ -6,9 +6,17 @@ import(
 )
 
 // Values
+pub fn render_html(@layout.GraphLayout, String) -> String
+
+pub fn render_html_with_config(@layout.GraphLayout, String, SvgConfig) -> String
+
 pub fn render_svg(@layout.GraphLayout) -> String
 
 pub fn render_svg_with_config(@layout.GraphLayout, SvgConfig) -> String
+
+pub fn save_html(@layout.GraphLayout, String, String) -> Result[Unit, String]
+
+pub fn save_html_with_config(@layout.GraphLayout, String, String, SvgConfig) -> Result[Unit, String]
 
 pub fn save_svg(@layout.GraphLayout, String) -> Result[Unit, String]
 

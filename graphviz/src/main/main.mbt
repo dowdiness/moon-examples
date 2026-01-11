@@ -22,12 +22,17 @@ fn test_layout(name : String, dot : String) -> Unit {
         println("  \{edge.from} -> \{edge.to}\{rev}")
       }
 
-      // Save to file
+      // Save to files
       let safe_name = name.replace(old=" ", new="_")
-      let filename = "\{safe_name}.svg"
-      match @svg.save_svg(layout, filename) {
-        Ok(_) => println("\nSaved SVG to: \{filename}")
+      let svg_filename = "\{safe_name}.svg"
+      let html_filename = "\{safe_name}.html"
+      match @svg.save_svg(layout, svg_filename) {
+        Ok(_) => println("\nSaved SVG to: \{svg_filename}")
         Err(e) => println("\nError saving SVG: \{e}")
+      }
+      match @svg.save_html(layout, html_filename, name) {
+        Ok(_) => println("Saved HTML to: \{html_filename}")
+        Err(e) => println("Error saving HTML: \{e}")
       }
       println("\nSVG Preview:")
       println("---")
