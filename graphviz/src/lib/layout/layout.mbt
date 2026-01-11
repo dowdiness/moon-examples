@@ -8,7 +8,7 @@ pub fn compute_layout(graph : @parser.Graph) -> GraphLayout {
 ///|
 pub fn compute_layout_with_config(
   graph : @parser.Graph,
-  config : LayoutConfig
+  config : LayoutConfig,
 ) -> GraphLayout {
   // 1. Extract internal graph from AST
   let internal = extract_graph(graph)
@@ -34,7 +34,13 @@ pub fn compute_layout_with_config(
   let bounds = calculate_bounds(node_positions)
 
   // 8. Return complete layout
-  { nodes: node_positions, edges, bounds, layers: ordered_layers }
+  {
+    nodes: node_positions,
+    edges,
+    bounds,
+    layers: ordered_layers,
+    directed: graph.directed,
+  }
 }
 
 ///|
@@ -44,13 +50,11 @@ fn calculate_bounds(nodes : Map[String, LayoutNode]) -> Bounds {
   let mut max_x = 0.0
   let mut max_y = 0.0
   let mut first = true
-
   nodes.each(fn(_id, node) {
     let node_min_x = node.position.x
     let node_min_y = node.position.y
     let node_max_x = node.position.x + node.size.width
     let node_max_y = node.position.y + node.size.height
-
     if first {
       min_x = node_min_x
       min_y = node_min_y
@@ -72,6 +76,5 @@ fn calculate_bounds(nodes : Map[String, LayoutNode]) -> Bounds {
       }
     }
   })
-
   { min_x, min_y, max_x, max_y }
 }

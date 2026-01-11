@@ -5,3 +5,5 @@
 https://viz-js.com/
 
 https://hpcc-systems.github.io/hpcc-js-wasm/
+
+https://hackage.haskell.org/package/dotparse

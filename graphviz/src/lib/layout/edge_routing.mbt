@@ -4,10 +4,9 @@
 pub fn route_edges(
   graph : InternalGraph,
   node_positions : Map[String, LayoutNode],
-  _config : LayoutConfig
+  _config : LayoutConfig,
 ) -> Array[LayoutEdge] {
   let edges : Array[LayoutEdge] = []
-
   for edge in graph.edges {
     match (node_positions.get(edge.from), node_positions.get(edge.to)) {
       (Some(from_node), Some(to_node)) => {
@@ -17,7 +16,6 @@ pub fn route_edges(
       _ => ()
     }
   }
-
   edges
 }
 
@@ -25,10 +23,9 @@ pub fn route_edges(
 fn create_layout_edge(
   edge : Edge,
   from_node : LayoutNode,
-  to_node : LayoutNode
+  to_node : LayoutNode,
 ) -> LayoutEdge {
   let (source_point, target_point) = compute_edge_endpoints(from_node, to_node)
-
   {
     from: edge.from,
     to: edge.to,
@@ -40,7 +37,7 @@ fn create_layout_edge(
 ///|
 fn compute_edge_endpoints(
   from_node : LayoutNode,
-  to_node : LayoutNode
+  to_node : LayoutNode,
 ) -> (Point, Point) {
   // Source point: bottom center of from_node
   let source_point : Point = {
@@ -53,6 +50,5 @@ fn compute_edge_endpoints(
     x: to_node.position.x + to_node.size.width / 2.0,
     y: to_node.position.y,
   }
-
   (source_point, target_point)
 }

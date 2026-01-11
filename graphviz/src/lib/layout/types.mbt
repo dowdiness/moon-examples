@@ -1,6 +1,7 @@
 // Layout data structures for graph visualization
 
 // Point and dimension primitives
+
 ///|
 pub struct Point {
   x : Double
@@ -14,6 +15,7 @@ pub struct Size {
 } derive(Eq, Show)
 
 // Bounding box for the entire graph
+
 ///|
 pub struct Bounds {
   min_x : Double
@@ -23,34 +25,39 @@ pub struct Bounds {
 } derive(Eq, Show)
 
 // Positioned node with layout information
+
 ///|
 pub struct LayoutNode {
-  id : String              // Original node ID from AST
-  position : Point         // Top-left corner (x, y)
-  size : Size              // Node dimensions
-  layer : Int              // Vertical layer assignment (0 = top)
-  order : Int              // Horizontal position within layer
+  id : String // Original node ID from AST
+  position : Point // Top-left corner (x, y)
+  size : Size // Node dimensions
+  layer : Int // Vertical layer assignment (0 = top)
+  order : Int // Horizontal position within layer
 } derive(Eq, Show)
 
 // Edge with routing waypoints
+
 ///|
 pub struct LayoutEdge {
-  from : String            // Source node ID
-  to : String              // Target node ID
+  from : String // Source node ID
+  to : String // Target node ID
   waypoints : Array[Point] // Polyline path (including endpoints)
-  reversed : Bool          // True if edge was reversed for cycle removal
+  reversed : Bool // True if edge was reversed for cycle removal
 } derive(Eq, Show)
 
 // Complete graph layout result
+
 ///|
 pub struct GraphLayout {
-  nodes : Map[String, LayoutNode]  // Node ID -> layout info
-  edges : Array[LayoutEdge]             // All edges with routing
-  bounds : Bounds                       // Overall graph dimensions
-  layers : Array[Array[String]]         // Layer structure: layer index -> node IDs
+  nodes : Map[String, LayoutNode] // Node ID -> layout info
+  edges : Array[LayoutEdge] // All edges with routing
+  bounds : Bounds // Overall graph dimensions
+  layers : Array[Array[String]] // Layer structure: layer index -> node IDs
+  directed : Bool // Whether the graph is directed
 } derive(Show)
 
 // Internal graph representation (for algorithm use)
+
 ///|
 pub(all) struct InternalGraph {
   nodes : Map[String, NodeInfo]
@@ -61,8 +68,8 @@ pub(all) struct InternalGraph {
 ///|
 pub(all) struct NodeInfo {
   id : String
-  mut incoming : Array[String]  // Incoming edge sources
-  mut outgoing : Array[String]  // Outgoing edge targets
+  mut incoming : Array[String] // Incoming edge sources
+  mut outgoing : Array[String] // Outgoing edge targets
 } derive(Show)
 
 ///|
@@ -75,5 +82,5 @@ pub(all) struct Edge {
 ///|
 pub(all) enum EdgeDirection {
   Forward
-  Backward  // Edge was reversed during cycle removal
+  Backward // Edge was reversed during cycle removal
 } derive(Eq, Show)

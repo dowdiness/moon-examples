@@ -27,13 +27,13 @@ test "full_layout_simple_chain" {
   match @parser.parse_dot(dot) {
     Some(graph) => {
       let layout = compute_layout(graph)
-
       inspect(layout.nodes.length(), content="3")
       inspect(layout.edges.length(), content="2")
       inspect(layout.layers.length(), content="3")
 
       // Verify all nodes exist
-      if layout.nodes.contains("a") && layout.nodes.contains("b") &&
+      if layout.nodes.contains("a") &&
+        layout.nodes.contains("b") &&
         layout.nodes.contains("c") {
         println("All nodes have layout positions")
       }
@@ -54,7 +54,6 @@ test "full_layout_diamond" {
   match @parser.parse_dot(dot) {
     Some(graph) => {
       let layout = compute_layout(graph)
-
       inspect(layout.nodes.length(), content="4")
       inspect(layout.edges.length(), content="4")
       inspect(layout.layers.length(), content="3")
@@ -74,11 +73,9 @@ test "full_layout_automaton" {
     #|  3 -> 5
     #|  4 -> 4
     #|}
-
   match @parser.parse_dot(dot_automaton) {
     Some(graph) => {
       let layout = compute_layout(graph)
-
       inspect(layout.nodes.length(), content="6")
     }
     None => println("Parse error: full_layout_automaton")

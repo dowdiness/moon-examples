@@ -37,40 +37,34 @@ fn dfs_visit(node : String, graph : InternalGraph, state : DFSState) -> Unit {
 
   // Visit all outgoing neighbors
   match graph.nodes.get(node) {
-    Some(node_info) => {
+    Some(node_info) =>
       for neighbor in node_info.outgoing {
         match state.visited.get(neighbor) {
-          Some(false) => {
+          Some(false) =>
             // Tree edge - continue DFS
             dfs_visit(neighbor, graph, state)
-          }
-          Some(true) => {
+          Some(true) =>
             // Already visited - check if it's a back edge
             match state.on_stack.get(neighbor) {
-              Some(true) => {
+              Some(true) =>
                 // Back edge detected - mark for reversal
                 state.reversed_edges.push((node, neighbor))
-              }
               _ => ()
             }
-          }
           None => ()
         }
       }
-    }
     None => ()
   }
-
   state.on_stack.set(node, false)
 }
 
 ///|
 fn reverse_edges(
   graph : InternalGraph,
-  to_reverse : Array[(String, String)]
+  to_reverse : Array[(String, String)],
 ) -> InternalGraph {
   let new_edges : Array[Edge] = []
-
   for edge in graph.edges {
     // Check if this edge should be reversed
     let mut should_reverse = false
@@ -81,7 +75,6 @@ fn reverse_edges(
         break
       }
     }
-
     if should_reverse {
       // Reverse the edge
       new_edges.push({
@@ -96,5 +89,9 @@ fn reverse_edges(
   }
 
   // Rebuild adjacency lists with new edges
-  build_adjacency_lists({ nodes: graph.nodes, edges: new_edges, directed: graph.directed })
+  build_adjacency_lists({
+    nodes: graph.nodes,
+    edges: new_edges,
+    directed: graph.directed,
+  })
 }

@@ -4,7 +4,7 @@
 pub fn minimize_crossings(
   graph : InternalGraph,
   layers : Array[Array[String]],
-  iterations : Int
+  iterations : Int,
 ) -> Array[Array[String]] {
   let mut current_layers = copy_layers(layers)
 
@@ -15,7 +15,6 @@ pub fn minimize_crossings(
     // Sweep up
     current_layers = sweep_up(graph, current_layers)
   }
-
   current_layers
 }
 
@@ -35,7 +34,7 @@ fn copy_layers(layers : Array[Array[String]]) -> Array[Array[String]] {
 ///|
 fn sweep_down(
   graph : InternalGraph,
-  layers : Array[Array[String]]
+  layers : Array[Array[String]],
 ) -> Array[Array[String]] {
   let new_layers = copy_layers(layers)
 
@@ -46,23 +45,19 @@ fn sweep_down(
 
     // Compute barycenters for nodes in current layer based on previous layer
     let barycenters = compute_layer_barycenters(
-      current_layer,
-      previous_layer,
-      graph,
-      true,
+      current_layer, previous_layer, graph, true,
     )
 
     // Sort current layer by barycenter
     new_layers[i] = sort_by_barycenter(current_layer, barycenters)
   }
-
   new_layers
 }
 
 ///|
 fn sweep_up(
   graph : InternalGraph,
-  layers : Array[Array[String]]
+  layers : Array[Array[String]],
 ) -> Array[Array[String]] {
   let new_layers = copy_layers(layers)
 
@@ -73,16 +68,12 @@ fn sweep_up(
 
     // Compute barycenters for nodes in current layer based on next layer
     let barycenters = compute_layer_barycenters(
-      current_layer,
-      next_layer,
-      graph,
-      false,
+      current_layer, next_layer, graph, false,
     )
 
     // Sort current layer by barycenter
     new_layers[i] = sort_by_barycenter(current_layer, barycenters)
   }
-
   new_layers
 }
 
@@ -91,20 +82,15 @@ fn compute_layer_barycenters(
   current_layer : Array[String],
   adjacent_layer : Array[String],
   graph : InternalGraph,
-  use_incoming : Bool
+  use_incoming : Bool,
 ) -> Map[String, Double] {
   let barycenters : Map[String, Double] = Map::new()
-
   for node in current_layer {
     let barycenter = compute_barycenter(
-      node,
-      adjacent_layer,
-      graph,
-      use_incoming,
+      node, adjacent_layer, graph, use_incoming,
     )
     barycenters.set(node, barycenter)
   }
-
   barycenters
 }
 
@@ -113,7 +99,7 @@ fn compute_barycenter(
   node : String,
   adjacent_layer : Array[String],
   graph : InternalGraph,
-  use_incoming : Bool
+  use_incoming : Bool,
 ) -> Double {
   // Get connections (incoming or outgoing)
   let connections = match graph.nodes.get(node) {
@@ -125,7 +111,6 @@ fn compute_barycenter(
       }
     None => []
   }
-
   if connections.is_empty() {
     // No connections - use middle position
     return adjacent_layer.length().to_double() / 2.0
@@ -134,7 +119,6 @@ fn compute_barycenter(
   // Find positions of connected nodes in adjacent layer
   let mut sum = 0.0
   let mut count = 0
-
   for connected_node in connections {
     // Find position of connected node in adjacent layer
     for i = 0; i < adjacent_layer.length(); i = i + 1 {
@@ -145,18 +129,16 @@ fn compute_barycenter(
       }
     }
   }
-
   if count == 0 {
     return adjacent_layer.length().to_double() / 2.0
   }
-
   sum / count.to_double()
 }
 
 ///|
 fn sort_by_barycenter(
   layer : Array[String],
-  barycenters : Map[String, Double]
+  barycenters : Map[String, Double],
 ) -> Array[String] {
   // Create array of (node, barycenter) pairs
   let pairs : Array[(String, Double)] = []

@@ -58,6 +58,7 @@ pub struct GraphLayout {
   edges : Array[LayoutEdge]
   bounds : Bounds
   layers : Array[Array[String]]
+  directed : Bool
 }
 pub impl Show for GraphLayout
 
